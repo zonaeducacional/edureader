@@ -155,7 +155,7 @@
 <button class="btn-icono" data-i18n-title="settings" data-icono="settings" id="btn-ajustes" title="Ajustes"></button>
 </header>
 <main class="contenido" data-contenido-vista="" tabindex="-1">
-<div class="tarjeta aviso-cerrable oculto" id="aviso-sin-config">
+<div class="tarjeta aviso-cerrable oculto" id="aviso-sin-config" style="display: none !important;">
 <button aria-label="Cerrar" class="btn-cerrar-aviso" data-i18n-aria-label="close" data-i18n-title="close" data-icono="x" id="btn-cerrar-aviso-config" title="Cerrar" type="button"></button>
 <div data-i18n-html="noConfigHtml">
 <span>No hay ningún servidor configurado. Puedes abrir un libro (PDF o EPUB) de este dispositivo, o <a href="#" id="enlace-configurar">configurar tu nube (Nextcloud u otro WebDAV)</a> para sincronizar la posición de lectura entre dispositivos.</span>
@@ -644,12 +644,12 @@
            biblioteca, el lector y las copias se mezclaban y había que
            recorrerla entera para encontrar cualquier cosa. -->
 <div aria-label="Secciones de los ajustes" class="pestanas" data-grupo="ajustes" data-i18n-aria-label="settingsSections" role="tablist">
-<button aria-controls="panel-ajustes-nube" aria-selected="true" class="pestana" data-i18n="webdavShort" data-panel="nube" id="pestana-ajustes-nube" role="tab" type="button">Nuvem</button>
-<button aria-controls="panel-ajustes-datos" aria-selected="false" class="pestana" data-i18n="settingsData" data-panel="datos" id="pestana-ajustes-datos" role="tab" tabindex="-1" type="button">Datos</button>
+<button aria-controls="panel-ajustes-nube" aria-selected="false" class="pestana" data-i18n="webdavShort" data-panel="nube" id="pestana-ajustes-nube" role="tab" tabindex="-1" type="button" style="display: none !important;">Nuvem</button>
+<button aria-controls="panel-ajustes-datos" aria-selected="true" class="pestana" data-i18n="settingsData" data-panel="datos" id="pestana-ajustes-datos" role="tab" type="button">Datos</button>
 <button aria-controls="panel-ajustes-biblioteca" aria-selected="false" class="pestana" data-i18n="library" data-panel="biblioteca" id="pestana-ajustes-biblioteca" role="tab" tabindex="-1" type="button">Biblioteca</button>
 <button aria-controls="panel-ajustes-lector" aria-selected="false" class="pestana" data-i18n="reader" data-panel="lector" id="pestana-ajustes-lector" role="tab" tabindex="-1" type="button">Leitor</button>
 </div>
-<div aria-labelledby="pestana-ajustes-nube" class="panel-pestana" id="panel-ajustes-nube" role="tabpanel" tabindex="0">
+<div aria-labelledby="pestana-ajustes-nube" class="panel-pestana" id="panel-ajustes-nube" role="tabpanel" tabindex="0" style="display: none !important;">
 <form class="tarjeta" id="formulario-webdav">
 <h2 data-i18n="webdav">Nuvem (WebDAV)</h2>
 <p class="ayuda" data-i18n-html="webdavHelpHtml">Compatible con Nextcloud, ownCloud y cualquier servidor WebDAV. Los PDF de la carpeta indicada aparecerán en tu biblioteca y la posición de lectura se sincronizará entre todos tus dispositivos. ¿No sabes qué poner aquí? <a href="#" id="enlace-ayuda-ajustes">Lee la ayuda</a>.</p>
@@ -688,7 +688,7 @@
 <p class="ayuda" data-i18n="devicesRevokeHelp">⚠️ «Desligar» pede ao dispositivo para esquecer a configuração da nuvem e voltar a pedi-la, e só produz efeito na próxima vez que abrir aí. Não retira o acesso ao servidor: para isso, elimine a palavra-passe de aplicação na sua nuvem.</p>
 </div>
 </div>
-<div aria-labelledby="pestana-ajustes-datos" class="panel-pestana" id="panel-ajustes-datos" role="tabpanel" tabindex="0">
+<div aria-labelledby="pestana-ajustes-datos" class="panel-pestana activo" id="panel-ajustes-datos" role="tabpanel" tabindex="0">
 <div class="tarjeta">
 <h2 data-i18n="stats">Estatísticas de leitura</h2>
 <p class="ayuda" data-i18n="statsSettingsHelp">O tempo que dedica a ler, os dias seguidos que leva e os livros a que dedica mais tempo, somando todos os seus dispositivos.</p>
