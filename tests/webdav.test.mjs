@@ -33,7 +33,7 @@ test('guarda las anotaciones en un JSON lateral usando el ETag', async () => {
   };
 
   await cliente().escribirAnotaciones('Curso/tema.pdf', { version: 1, anotaciones: [] }, '"v2"');
-  assert.equal(url, 'https://nube.test/libros/Curso/tema.pdf.pagekeeper.json');
+  assert.equal(url, 'https://nube.test/libros/Curso/tema.pdf.edureader.json');
   assert.equal(peticion.headers['If-Match'], '"v2"');
 });
 
@@ -98,11 +98,11 @@ test('mueve el JSON lateral junto al libro y conserva las subcarpetas', async ()
     'Curso/tema.pdf', 'Archivo/tema.pdf', true,
   );
   assert.equal(movido, true);
-  assert.equal(peticiones[0].url, 'https://nube.test/libros/Curso/tema.pdf.pagekeeper.json');
+  assert.equal(peticiones[0].url, 'https://nube.test/libros/Curso/tema.pdf.edureader.json');
   assert.equal(peticiones[1].opciones.method, 'MOVE');
   assert.equal(
     peticiones[1].opciones.headers.Destination,
-    'https://nube.test/libros/Archivo/tema.pdf.pagekeeper.json',
+    'https://nube.test/libros/Archivo/tema.pdf.edureader.json',
   );
   assert.equal(peticiones[1].opciones.headers.Overwrite, 'T');
 });

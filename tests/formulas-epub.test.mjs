@@ -25,7 +25,7 @@ function capituloFalso({ mathml = false, texto = '', alturas = null, entiendeMat
     creados.push(elemento);
     return elemento;
   };
-  const raiz = { dataset: { pagekeeperScriptNonce: 'abc123' } };
+  const raiz = { dataset: { edureaderScriptNonce: 'abc123' } };
   const contents = {
     creados,
     insertados,
@@ -97,5 +97,5 @@ test('en un capítulo de solo MathML se avisa para no convertir el TeX escrito',
     alturas: { mo: 16, mspace: 96 },
   });
   inyectarMathJax(capitulo);
-  assert.equal(capitulo.document.documentElement.dataset.pagekeeperSoloMathml, '1');
+  assert.equal(capitulo.document.documentElement.dataset.edureaderSoloMathml, '1');
 });
