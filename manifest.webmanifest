@@ -1,12 +1,12 @@
 {
-  "name": "EduReader: lector de PDF y EPUB",
+  "name": "EduReader: Leitor de PDF e EPUB",
   "short_name": "EduReader",
-  "description": "Lector de PDF y EPUB que sincroniza la posición de lectura entre dispositivos mediante tu propia nube (WebDAV/Nextcloud).",
+  "description": "Leitor de PDF e EPUB que roda offline direto do navegador.",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#4d3e6b",
-  "theme_color": "#4d3e6b",
-  "lang": "es",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "lang": "pt-BR",
   "icons": [
     {
       "src": "iconos/icono.svg",
