@@ -1,0 +1,1805 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<meta content="#f8fafc" name="theme-color"/>
+<title>EduReader</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    /* Vibe Coding Premium Aesthetics Overrides */
+    :root {
+      --font-body: 'Inter', system-ui, sans-serif;
+      --font-heading: 'Outfit', system-ui, sans-serif;
+    }
+    body {
+      font-family: var(--font-body) !important;
+    }
+    h1, h2, h3, h4, h5, .cabecera, .titulo-libro {
+      font-family: var(--font-heading) !important;
+    }
+    /* Dark Mode Vibe Overrides */
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-tema="claro"]):not([data-tema="sepia"]) body {
+        background: linear-gradient(135deg, #020617 0%, #1e3a8a 100%) !important;
+        background-attachment: fixed !important;
+      }
+      :root:not([data-tema="claro"]):not([data-tema="sepia"]) .tarjeta,
+      :root:not([data-tema="claro"]):not([data-tema="sepia"]) .cabecera {
+        background: rgba(30, 58, 138, 0.3) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4) !important;
+      }
+      :root:not([data-tema="claro"]):not([data-tema="sepia"]) .cabecera {
+        position: relative !important;
+        z-index: 50 !important;
+      }
+      :root:not([data-tema="claro"]):not([data-tema="sepia"]) .panel-lateral,
+      :root:not([data-tema="claro"]):not([data-tema="sepia"]) .panel-margenes {
+        background: rgba(15, 23, 42, 0.75) !important;
+        backdrop-filter: blur(16px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      }
+    }
+
+    html[data-tema="oscuro"] body {
+      background: linear-gradient(135deg, #020617 0%, #1e3a8a 100%) !important;
+      background-attachment: fixed !important;
+    }
+    html[data-tema="oscuro"] .tarjeta, 
+    html[data-tema="oscuro"] .cabecera {
+      background: rgba(30, 58, 138, 0.3) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4) !important;
+    }
+    html[data-tema="oscuro"] .cabecera {
+      position: relative !important;
+      z-index: 50 !important;
+    }
+    html[data-tema="oscuro"] .panel-lateral,
+    html[data-tema="oscuro"] .panel-margenes {
+      background: rgba(15, 23, 42, 0.75) !important;
+      backdrop-filter: blur(16px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    
+    /* Animations */
+    .btn-icono, .tarjeta {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    .btn-icono:hover {
+      transform: translateY(-2px) scale(1.05);
+    }
+    .tarjeta:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4) !important;
+    }
+  </style>
+<meta content="https://bilateria.org/app/estadistica/edureader/track.php" name="analytics-endpoint"/>
+<meta content="https://bilateria.org/app/estadistica/edureader/admin-stats.php" name="analytics-stats-url"/>
+<meta content="edureader" name="analytics-site-id"/>
+<!-- Política de seguridad. Es una red de seguridad por si algún día se cuela
+       contenido ajeno en la propia página: los capítulos EPUB ya se sanean y
+       llevan su propia política, mucho más estricta, en js/lector-epub.js.
+
+       Va en un <meta> porque GitHub Pages no deja poner cabeceras. Eso impide
+       usar frame-ancestors y sandbox, que solo valen como cabecera de verdad.
+
+       connect-src no puede cerrarse: la nube WebDAV la elige cada persona y
+       puede estar en cualquier dominio, incluso en http en una red local. Aun
+       así el resto sigue acotado, que es lo que evita que un descuido acabe
+       cargando código de fuera.
+
+       blob: hace falta en varios sitios propios: el worker de PDF.js, las
+       portadas guardadas, las descargas y los capítulos del EPUB. También en
+       font-src: las tipografías que trae incrustadas un libro se sirven así, y
+       sin ellas un libro con fórmulas (que suele traer la suya) se ve con la
+       letra del sistema y los símbolos salen donde pueden. Es el mismo riesgo
+       que ya se acepta con sus imágenes, y esas direcciones las crea la propia
+       aplicación: no abre la puerta a nada de fuera.
+
+       style-src lleva 'unsafe-inline' porque el navegador cuenta como estilo
+       en línea todo lo que se escribe desde JavaScript (elemento.style.alto),
+       y así se pintan las barras del gráfico, el reparto de cada libro o el
+       ancho del panel lateral. No hay forma de dejarlo fuera sin renunciar a
+       eso; lo que de verdad protege esta política es script-src. Y blob:,
+       porque las hojas de estilo que trae cada EPUB se cargan así. -->
+<meta content="
+    default-src 'self';
+    base-uri 'self';
+    object-src 'none';
+    form-action 'self';
+    script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://bilateria.org;
+    style-src 'self' 'unsafe-inline' blob: https://fonts.googleapis.com;
+    img-src 'self' data: blob:;
+    font-src 'self' data: blob: https://fonts.gstatic.com;
+    media-src 'self' data: blob:;
+    worker-src 'self' blob:;
+    frame-src 'self' data: blob:;
+    manifest-src 'self';
+    connect-src *;
+  " http-equiv="Content-Security-Policy"/>
+<link href="css/estilos.css" rel="stylesheet"/>
+<link href="manifest.webmanifest" rel="manifest"/>
+<link href="iconos/icono.svg" rel="icon" type="image/svg+xml"/>
+<script src="js/tema-inicial.js"></script>
+</head>
+<body>
+<!-- Primera parada del tabulador: la barra del lector tiene veinte botones
+       por delante de la página del libro. -->
+<button class="salto-contenido" data-i18n="skipToContent" id="salto-contenido" type="button">Saltar al contenido</button>
+<!-- ═══════════ BIBLIOTECA ═══════════ -->
+<section class="vista" id="vista-biblioteca">
+<header class="cabecera flex items-center p-4">
+<h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-yellow-200" data-foco-vista="" tabindex="-1"><span class="icono-app" data-icono="book-open"></span>EduReader<span class="subtitulo-app ml-2 text-sm text-blue-200 font-normal" data-i18n="appTagline">Leitor de livros eletrônicos</span></h1>
+<label class="selector-idioma" for="selector-idioma"><span class="sr-solo" data-i18n="language">Idioma</span>
+<select aria-label="Idioma" data-i18n-aria-label="language" id="selector-idioma">
+<option value="es">ES</option><option value="ca">CA</option><option value="gl">GL</option><option value="eu">EU</option><option value="en">EN</option><option value="fr">FR</option><option value="de">DE</option><option value="pt">PT</option>
+</select>
+</label>
+<div class="control-margenes" id="control-tema">
+<button aria-expanded="false" aria-haspopup="menu" class="btn-icono" data-i18n-title="theme" id="btn-tema" title="Tema"></button>
+<div aria-label="Tema" class="panel-margenes panel-columnas" data-i18n-aria-label="theme" hidden="" id="panel-tema" role="menu"></div>
+</div>
+<button class="btn-icono" data-i18n-title="stats" data-icono="chart-column" id="btn-estadisticas" title="Estatísticas de leitura"></button>
+<button class="btn-icono" data-i18n-title="importExport" data-icono="folder-input" id="btn-archivos" title="Importar e exportar"></button>
+<button class="btn-icono" data-i18n-title="help" data-icono="circle-help" id="btn-ayuda" title="Ayuda"></button>
+<button class="btn-icono" data-i18n-title="settings" data-icono="settings" id="btn-ajustes" title="Ajustes"></button>
+</header>
+<main class="contenido" data-contenido-vista="" tabindex="-1">
+<div class="tarjeta aviso-cerrable oculto" id="aviso-sin-config">
+<button aria-label="Cerrar" class="btn-cerrar-aviso" data-i18n-aria-label="close" data-i18n-title="close" data-icono="x" id="btn-cerrar-aviso-config" title="Cerrar" type="button"></button>
+<div data-i18n-html="noConfigHtml">
+<span>No hay ningún servidor configurado. Puedes abrir un libro (PDF o EPUB) de este dispositivo, o <a href="#" id="enlace-configurar">configurar tu nube (Nextcloud u otro WebDAV)</a> para sincronizar la posición de lectura entre dispositivos.</span>
+<p class="ayuda">¿No sabes qué es esto o qué necesitas? <a href="#" id="enlace-ayuda-aviso">Lee la ayuda</a>.</p>
+</div>
+<label class="casilla casilla-aviso">
+<input checked="" id="no-mostrar-aviso-config" type="checkbox"/>
+<span data-i18n="dontShowAgain">Não mostrar novamente</span>
+</label>
+</div>
+<div class="tarjeta aviso-cerrable oculto" id="aviso-ejemplos">
+<button aria-label="Cerrar" class="btn-cerrar-aviso" data-i18n-aria-label="close" data-i18n-title="close" data-icono="x" id="btn-cerrar-aviso-ejemplos" title="Cerrar" type="button"></button>
+<div data-i18n-html="sampleNoticeHtml">
+<h2>Dos libros para empezar</h2>
+<span>Tu biblioteca incluye dos libros de ejemplo para que puedas probar EduReader desde el primer momento. Son tuyos: puedes leerlos, conservarlos o borrarlos cuando quieras desde el menú de acciones de cada libro.</span>
+</div>
+<label class="casilla casilla-aviso">
+<input checked="" id="no-mostrar-aviso-ejemplos" type="checkbox"/>
+<span data-i18n="dontShowAgain">Não mostrar novamente</span>
+</label>
+</div>
+<section class="libro-ejemplo oculto" id="libro-ejemplo">
+<span class="icono-libro-ejemplo" data-icono="book-open"></span>
+<div class="texto-libro-ejemplo">
+<h2 data-i18n="sampleBookHeading">Comece com um livro de exemplo</h2>
+<p data-i18n="sampleBookHelp">Tu biblioteca está vacía. Añade uno de estos ejemplos para probar EduReader:</p>
+</div>
+<div class="botones-libro-ejemplo" id="botones-libro-ejemplo"></div>
+</section>
+<section aria-labelledby="titulo-continuar" class="continuar-leyendo oculto" id="continuar-leyendo">
+<div class="cabecera-continuar">
+<span class="icono-continuar" data-icono="book-open"></span>
+<div class="texto-continuar">
+<h2 data-i18n="continueReading" id="titulo-continuar">Continuar a ler</h2>
+<p data-i18n="continueReadingHelp">Tu lectura más reciente, con las demás a un toque</p>
+</div>
+<button aria-controls="libro-continuar" aria-expanded="true" class="btn-icono btn-plegar-seccion" data-i18n-title="toggleSection" data-icono="chevron-down" id="btn-plegar-continuar" title="Recolher ou expandir a secção" type="button"></button>
+<button class="btn-icono" data-i18n-title="removeContinue" data-icono="x" id="btn-quitar-continuar" title="Quitar «Continuar leyendo» de la biblioteca" type="button"></button>
+</div>
+<!-- Envoltorio doble: el de fuera anima su altura (grid 1fr → 0fr) y el
+             de dentro es el que se recorta mientras encoge. -->
+<div class="cuerpo-plegable"><div class="interior-plegable">
+<ul class="lista-libros" id="libro-continuar"></ul>
+<button aria-controls="libro-continuar" aria-expanded="false" class="btn-mas-recientes oculto" id="btn-mas-recientes" type="button"></button>
+<label class="casilla casilla-abrir-ultimo">
+<input id="casilla-abrir-ultimo" type="checkbox"/>
+<span data-i18n="openLastOnStart">Abrir a última leitura ao iniciar o EduReader</span>
+</label>
+</div></div>
+</section>
+<!-- Caja con dos controles (el campo y la «x»), así que no puede ser un
+           label: la etiqueta va aparte, atada al campo por su id. -->
+<div class="buscador buscador-biblioteca oculto">
+<span data-icono="search"></span>
+<label class="sr-solo" data-i18n="searchLibrary" for="buscar-biblioteca">Pesquisar na biblioteca</label>
+<input autocomplete="off" data-i18n-placeholder="searchLibraryPlaceholder" id="buscar-biblioteca" placeholder="Buscar por título, autor…" type="search"/>
+<button class="btn-limpiar-busqueda oculto" data-i18n-title="clearSearch" data-icono="x" id="btn-limpiar-busqueda" title="Borrar la búsqueda" type="button"></button>
+</div>
+<div class="organizacion-biblioteca oculto" id="organizacion-biblioteca">
+<label>
+<span data-i18n="filterBy">Mostrar</span>
+<select id="filtro-biblioteca">
+<option data-i18n="filterAll" value="todos">Todos</option>
+<!-- Dos preguntas distintas en un mismo control: por dónde va la
+                 lectura y qué me pareció. Separadas en grupos porque no se
+                 pueden combinar, y juntas para no añadir otro selector. -->
+<optgroup data-i18n-label="filterGroupStatus" label="Lectura">
+<option data-i18n="filterReading" value="leyendo">Leyendo</option>
+<option data-i18n="filterPending" value="pendientes">Pendientes</option>
+<option data-i18n="filterFinished" value="terminados">Terminados</option>
+</optgroup>
+<optgroup data-i18n-label="filterGroupRating" label="Calificación">
+<option data-i18n="filterRated4" value="calificados4">4 estrellas o más</option>
+<option data-i18n="filterRated3" value="calificados3">3 estrellas o más</option>
+<option data-i18n="filterUnrated" value="sinCalificar">Sin calificar</option>
+</optgroup>
+</select>
+</label>
+<label>
+<span data-i18n="sortBy">Ordenar por</span>
+<select id="orden-biblioteca">
+<option data-i18n="sortRecent" value="reciente">Lectura reciente</option>
+<option data-i18n="sortTitle" value="titulo">Título</option>
+<option data-i18n="sortAuthor" value="autor">Autor</option>
+<option data-i18n="sortProgress" value="progreso">Progreso</option>
+<option data-i18n="sortRating" value="calificacion">Classificação</option>
+</select>
+</label>
+<div class="conmutador-vista">
+<span data-i18n="viewLabel" id="etiqueta-vista">Vista</span>
+<div aria-labelledby="etiqueta-vista" class="grupo-vista" role="group">
+<button aria-pressed="true" data-i18n-title="viewList" data-icono="list" id="btn-vista-lista" title="Vista de lista" type="button"></button>
+<button aria-pressed="false" data-i18n-title="viewGrid" data-icono="layout-grid" id="btn-vista-cuadricula" title="Vista de cuadrícula" type="button"></button>
+</div>
+</div>
+</div>
+<p class="estado oculto" id="estado-filtro-biblioteca" role="status"></p>
+<div class="destino-arrastre oculto" id="zona-remota">
+<div class="indicador-arrastre" data-i18n="dropCloud">Suelta aquí para subir a la nube</div>
+<div class="fila-seccion">
+<div class="encabezado-seccion">
+<div class="titulo-y-estado-seccion">
+<h2 id="titulo-carpeta"><span class="icono-seccion" data-icono="cloud"></span><span data-i18n="cloud">En la nube</span></h2>
+<!-- Solo aparece cuando la sincronización falla: decir que todo va bien
+                   no hacía falta, avisar de que no va sí. -->
+<span class="estado-sincronizacion error oculto"></span>
+<span class="conteo-seccion" id="conteo-nube"></span>
+</div>
+<p data-i18n="cloudScope">Livros e progresso disponíveis em todos os seus dispositivos</p>
+</div>
+<button class="btn-icono" data-i18n-title="newFolder" data-icono="folder-plus" id="btn-carpeta-nueva" title="Criar uma pasta"></button>
+<label class="btn-icono" data-i18n-title="addCloud" data-icono="cloud-upload" for="selector-subir-nube" title="Enviar um livro (PDF ou EPUB) para a nuvem"></label>
+<input accept=".pdf,.epub,application/pdf,application/epub+zip" hidden="" id="selector-subir-nube" multiple="" type="file"/>
+<label class="btn-icono accion-carpeta" data-i18n-title="addCloudFolder" data-icono="folder-up" for="selector-subir-carpeta-nube" title="Enviar uma pasta inteira para a nuvem"></label>
+<input hidden="" id="selector-subir-carpeta-nube" multiple="" type="file" webkitdirectory=""/>
+<button class="btn-icono" data-i18n-title="reload" data-icono="refresh-cw" id="btn-recargar" title="Recargar"></button>
+<button aria-controls="zona-remota" aria-expanded="true" class="btn-icono btn-plegar-seccion" data-i18n-title="toggleSection" data-icono="chevron-down" id="btn-plegar-nube" title="Recolher ou expandir a secção"></button>
+</div>
+<div class="cuerpo-plegable"><div class="interior-plegable">
+<nav aria-label="Carpeta actual" class="ruta-carpeta oculto" data-i18n-aria-label="currentFolder" id="ruta-carpeta"></nav>
+<!-- La nota de la carpeta en la que se ha entrado: describe lo que
+               hay dentro, así que es dentro donde más falta hace. -->
+<section class="nota-carpeta-abierta oculto" id="nota-carpeta-nube">
+<p class="texto-nota-carpeta"></p>
+<button class="btn-icono btn-editar-nota-carpeta" data-i18n-title="actionFolderNote" data-icono="notebook-pen" title="Nota da pasta" type="button"></button>
+</section>
+<div class="estado" id="estado-remoto" role="status"></div>
+<ul class="lista-libros lista-carpetas" id="lista-carpetas"></ul>
+<ul class="lista-libros" id="lista-libros"></ul>
+</div></div>
+</div>
+<div class="destino-arrastre" id="zona-local">
+<div class="indicador-arrastre" data-i18n="dropLocal">Largue aqui para guardar neste dispositivo</div>
+<div class="fila-seccion">
+<div class="encabezado-seccion">
+<div class="titulo-y-estado-seccion">
+<h2><span class="icono-seccion" data-icono="smartphone"></span><span data-i18n="device">Neste dispositivo</span></h2>
+<span class="conteo-seccion" id="conteo-local"></span>
+</div>
+<p data-i18n="localScope">Livros guardados apenas neste dispositivo</p>
+</div>
+<button class="btn-icono" data-i18n-title="newFolder" data-icono="folder-plus" id="btn-carpeta-nueva-local" title="Criar uma pasta"></button>
+<label class="btn-icono" data-i18n-title="addLocal" data-icono="plus" for="selector-archivo" title="Añadir un libro (PDF o EPUB) de este dispositivo"></label>
+<input accept=".pdf,.epub,application/pdf,application/epub+zip" hidden="" id="selector-archivo" multiple="" type="file"/>
+<label class="btn-icono accion-carpeta" data-i18n-title="addLocalFolder" data-icono="folder-up" for="selector-carpeta" title="Adicionar uma pasta inteira deste dispositivo"></label>
+<input hidden="" id="selector-carpeta" multiple="" type="file" webkitdirectory=""/>
+<button aria-controls="zona-local" aria-expanded="true" class="btn-icono btn-plegar-seccion" data-i18n-title="toggleSection" data-icono="chevron-down" id="btn-plegar-local" title="Recolher ou expandir a secção"></button>
+</div>
+<div class="cuerpo-plegable"><div class="interior-plegable">
+<nav aria-label="Carpeta actual" class="ruta-carpeta oculto" data-i18n-aria-label="currentFolder" id="ruta-carpeta-local"></nav>
+<section class="nota-carpeta-abierta oculto" id="nota-carpeta-local">
+<p class="texto-nota-carpeta"></p>
+<button class="btn-icono btn-editar-nota-carpeta" data-i18n-title="actionFolderNote" data-icono="notebook-pen" title="Nota da pasta" type="button"></button>
+</section>
+<p class="estado oculto" id="estado-local" role="status"></p>
+<button class="carga-local-vacia oculto" id="aviso-local-vacio" type="button">
+<span class="icono-carga-local" data-icono="plus"></span>
+<span class="texto-carga-local">
+<strong data-i18n="emptyLocalAction">Adicionar livros apenas a este dispositivo</strong>
+<span data-i18n="emptyLocalHelp">Não serão sincronizados. Selecione ficheiros PDF ou EPUB, ou arraste-os para aqui.</span>
+</span>
+</button>
+<ul class="lista-libros lista-carpetas" id="lista-carpetas-locales"></ul>
+<ul class="lista-libros" id="lista-locales"></ul>
+</div></div>
+</div>
+<footer class="pie">
+<div class="pie-principal">
+<!-- La versión, aquí y al pie de los ajustes: es lo primero que hay
+               que poder mirar cuando algo no va, y en el pie está a la vista
+               sin abrir nada. El texto lo pone el JavaScript. -->
+<span id="version-pie"></span>
+<span aria-hidden="true">·</span>
+<span>© 2026 Refatorado por <a href="https://github.com/zonaeducacional" rel="noopener" target="_blank">Sérgio Araújo</a> · Baseado no original de <a href="https://educacion.bilateria.org/" rel="noopener" target="_blank">Juan José de Haro</a></span>
+<span aria-hidden="true">·</span>
+<a data-i18n="license" href="LICENSE">Licencia MIT</a>
+<span aria-hidden="true">·</span>
+<a data-i18n="source" href="https://github.com/edureader/edureader.github.io" rel="noopener" target="_blank">Código fuente</a>
+<span aria-hidden="true">·</span>
+<details class="creditos-pie">
+<summary data-i18n="credits">Créditos</summary>
+<p data-i18n-html="creditsHtml">Construido con <a href="https://mozilla.github.io/pdf.js/" rel="noopener" target="_blank">PDF.js</a> (Apache 2.0), <a href="https://github.com/futurepress/epub.js" rel="noopener" target="_blank">epub.js</a> (BSD), JSZip (MIT), <a href="https://www.mathjax.org/" rel="noopener" target="_blank">MathJax</a> (Apache 2.0) e iconos <a href="https://lucide.dev" rel="noopener" target="_blank">Lucide</a> (ISC).</p>
+</details>
+<span aria-hidden="true">·</span>
+<details class="creditos-pie">
+<summary data-i18n="privacy">Privacidade</summary>
+<p data-i18n="analyticsNotice">Esta aplicação recolhe apenas estatísticas de utilização agregadas com um sistema próprio, para conhecer a sua utilização e melhorar a ferramenta. Não são armazenados endereços IP nem são usados cookies de análise para os visitantes.</p>
+</details>
+</div>
+</footer>
+</main>
+</section>
+<!-- ═══════════ LECTOR ═══════════ -->
+<section class="vista oculto" id="vista-lector">
+<header class="barra-lector">
+<button class="btn-icono" data-i18n-title="backLibrary" data-icono="arrow-left" id="btn-volver" title="Voltar à biblioteca"></button>
+<span class="titulo-libro" data-foco-vista="" id="titulo-libro" tabindex="-1"></span>
+<div class="grupo-posicion">
+<button class="btn-icono historial-movil" data-i18n-title="backPosition" data-icono="undo-2" id="btn-posicion-anterior" title="Volver a la posición anterior" type="button"></button>
+<button class="btn-pagina" data-i18n-title="goPage" id="btn-indicador" title="Ir a una página">– / –</button>
+<button class="btn-icono historial-movil" data-i18n-title="forwardPosition" data-icono="redo-2" id="btn-posicion-siguiente" title="Avanzar a la posición siguiente" type="button"></button>
+</div>
+<span class="tiempo-restante oculto" data-i18n-title="timeLeft" id="tiempo-restante" title="Tempo de leitura restante estimado"></span>
+<nav aria-label="Historial de navegación" class="historial-navegacion oculto" data-i18n-aria-label="historyNavigation" id="historial-navegacion">
+<button class="btn-icono" data-i18n-title="backPosition" data-icono="undo-2" id="btn-posicion-anterior-escritorio" title="Volver a la posición anterior" type="button"></button>
+<button class="btn-icono" data-i18n-title="forwardPosition" data-icono="redo-2" id="btn-posicion-siguiente-escritorio" title="Avanzar a la posición siguiente" type="button"></button>
+</nav>
+<span class="separador"></span>
+<button class="btn-icono oculto" data-i18n-title="saveCloud" data-icono="cloud-upload" id="btn-subir" title="Guardar en mi nube"></button>
+<button aria-controls="panel-indice-libro" aria-expanded="false" aria-pressed="false" class="btn-icono oculto" data-icono="panel-left-text" id="btn-indice-libro" title="Mostrar el índice"></button>
+<button aria-controls="panel-marcadores" aria-expanded="false" class="btn-icono" data-i18n-title="bookmarks" data-icono="bookmark" id="btn-marcadores" title="Marcadores"></button>
+<button aria-controls="panel-anotaciones" aria-expanded="false" class="btn-icono" data-i18n-title="annotations" data-icono="highlighter" id="btn-anotaciones" title="Anotações"></button>
+<button class="btn-icono" data-i18n-title="searchBook" data-icono="search" id="btn-buscar-libro" title="Pesquisar dentro do livro"></button>
+<div class="control-margenes" id="control-tts">
+<button aria-expanded="false" aria-haspopup="dialog" aria-label="Leitura em voz alta" aria-pressed="false" class="btn-icono" data-i18n-aria-label="readAloud" data-i18n-title="readAloud" data-icono="volume-2" id="btn-tts" title="Leitura em voz alta"></button>
+<div aria-label="Leitura em voz alta" class="panel-margenes" data-i18n-aria-label="readAloud" hidden="" id="panel-tts" role="dialog">
+<div class="botones-tts">
+<button class="btn-primario" id="btn-tts-leer" type="button"></button>
+<button class="btn-secundario" disabled="" id="btn-tts-detener" type="button"></button>
+</div>
+<label class="campo-texto-epub"><span data-i18n="ttsVoice">Voz</span>
+<select id="voz-tts"></select>
+</label>
+<label class="campo-texto-epub"><span data-i18n="ttsSpeed">Velocidad</span>
+<select id="velocidad-tts">
+<option value="0.75">0,75×</option>
+<option selected="" value="1">1×</option>
+<option value="1.25">1,25×</option>
+<option value="1.5">1,5×</option>
+<option value="2">2×</option>
+</select>
+</label>
+<p class="ayuda" data-i18n="ttsHelp">Começa na página atual, realça a frase que está a soar e passa de página sozinha.</p>
+</div>
+</div>
+<button class="btn-icono" id="btn-modo" title="Ver páginas continuas"></button>
+<div class="control-margenes" id="control-columnas">
+<button aria-expanded="false" aria-haspopup="menu" aria-label="Colunas" class="btn-icono" data-i18n-aria-label="columnsSettings" data-i18n-title="columnsSettings" data-icono="columns-2" id="btn-columnas" title="Colunas"></button>
+<div aria-label="Colunas" class="panel-margenes panel-columnas" data-i18n-aria-label="columnsSettings" hidden="" id="panel-columnas" role="menu"></div>
+</div>
+<button class="btn-icono oculto" data-i18n-title="rotatePage" data-icono="rotate-cw" id="btn-rotar" title="Girar la página"></button>
+<div class="control-margenes oculto" id="control-texto">
+<button aria-expanded="false" aria-haspopup="dialog" aria-label="Definições de texto" class="btn-icono" data-i18n-aria-label="textSettings" data-i18n-title="textSettings" data-icono="type" id="btn-texto" title="Definições de texto"></button>
+<div aria-label="Definições de texto" class="panel-margenes" data-i18n-aria-label="textSettings" hidden="" id="panel-texto" role="dialog">
+<label class="campo-texto-epub"><span data-i18n="fontFamily">Tipo de letra</span>
+<select id="fuente-epub">
+<option data-i18n="bookFont" value="libro">A do livro</option>
+<option data-i18n="serifFont" value="serif">Con serifa</option>
+<option data-i18n="sansFont" value="sans">Sin serifa</option>
+</select>
+</label>
+<label class="campo-texto-epub"><span data-i18n="textAlignment">Alinhamento</span>
+<select id="alineacion-epub">
+<option data-i18n="bookAlignment" value="libro">La del libro</option>
+<option data-i18n="unjustifiedAlignment" value="izquierda">Não justificado</option>
+<option data-i18n="justifiedAlignment" value="justificada">Justificado</option>
+</select>
+</label>
+<label class="campo-texto-epub"><span data-i18n="hyphenation">Dividir palavras</span>
+<select id="guionado-epub">
+<option data-i18n="hyphenationAuto" value="auto">Sí, al final de línea</option>
+<option data-i18n="hyphenationBook" value="libro">Como no livro</option>
+<option data-i18n="hyphenationNever" value="nunca">No partir</option>
+</select>
+</label>
+<label class="campo-texto-epub"><span data-i18n="lineSpacing">Entrelinha</span>
+<select id="interlineado-epub">
+<option data-i18n="bookSpacing" value="libro">El del libro</option>
+<option data-i18n="spacingCompact" value="1.3">Compacto</option>
+<option data-i18n="spacingNormal" value="1.5">Normal</option>
+<option data-i18n="spacingWide" value="1.8">Amplio</option>
+<option data-i18n="spacingWider" value="2.1">Muy amplio</option>
+</select>
+</label>
+<div class="cabecera-margenes">
+<label data-i18n="marginSide" for="margen-epub">Margem lateral</label>
+<output for="margen-epub" id="valor-margen">10 % por lado</output>
+</div>
+<input aria-describedby="ayuda-margen" id="margen-epub" max="30" min="0" step="1" type="range" value="10"/>
+<div aria-hidden="true" class="extremos-margen">
+<span data-i18n="noMargin">Sin margen</span><span data-i18n="moreMargin">Más margen</span>
+</div>
+<p class="ayuda" data-i18n="marginHelp" id="ayuda-margen">O texto reajusta-se ao mover o controlo. A margem é deste livro.</p>
+<button class="btn-secundario" id="btn-restablecer-texto" type="button">
+<span data-i18n="reset">Restablecer</span>
+</button>
+</div>
+</div>
+<div class="control-margenes grupo-zoom" id="control-zoom">
+<button class="btn-icono" data-i18n-title="zoomOut" data-icono="zoom-out" id="btn-zoom-menos" title="Reducir"></button>
+<button aria-expanded="false" aria-haspopup="dialog" class="btn-icono btn-zoom-valor" id="btn-ancho-auto"></button>
+<button class="btn-icono" data-i18n-title="zoomIn" data-icono="zoom-in" id="btn-zoom-mas" title="Ampliar"></button>
+<div aria-label="Zoom" class="panel-margenes panel-zoom" data-i18n-aria-label="zoom" hidden="" id="panel-zoom" role="dialog">
+<div class="fila-botones">
+<button class="btn-secundario" data-i18n="autoWidth" id="zoom-ancho" type="button">Ajustar al ancho</button>
+<button class="btn-secundario" data-i18n="fitPage" id="zoom-pagina" type="button">Ajustar la página completa</button>
+</div>
+<div class="valores-zoom" id="valores-zoom"></div>
+<form class="form-zoom" id="form-zoom">
+<label data-i18n="customZoom" for="campo-zoom">Otro</label>
+<input id="campo-zoom" inputmode="numeric" max="400" min="10" step="5" type="number"/>
+<span aria-hidden="true">%</span>
+<button class="btn-secundario" data-i18n="apply" type="submit">Aplicar</button>
+</form>
+<p class="ayuda" data-i18n="zoomHelp">Guardado apenas para este livro.</p>
+</div>
+</div>
+<button class="btn-icono" data-i18n-title="fitPage" data-icono="maximize" id="btn-pagina-completa" title="Ajustar la página completa"></button>
+<button aria-pressed="false" class="btn-icono" data-i18n-title="cropMargins" data-icono="crop" id="btn-recorte" title="Recortar los márgenes"></button>
+<button class="btn-icono oculto" data-i18n-title="printBook" data-icono="printer" id="btn-imprimir" title="Imprimir ou guardar em PDF"></button>
+<button aria-pressed="false" class="btn-icono" data-i18n-title="immersive" data-icono="expand" id="btn-inmersivo" title="Ler em ecrã inteiro"></button>
+<button aria-pressed="false" class="btn-icono oculto" data-icono="image" id="btn-imagenes-noche" title="Imágenes en su color"></button>
+<button aria-controls="fondo-menu-lector" aria-expanded="false" aria-haspopup="menu" class="btn-icono btn-menu-lector" data-i18n-title="moreReaderActions" data-icono="ellipsis-vertical" id="btn-menu-lector" title="Mais ações"></button>
+<div class="fondo-menu-lector oculto" id="fondo-menu-lector">
+<nav aria-label="Acciones de lectura" class="menu-lector" data-i18n-aria-label="readerActions" id="menu-lector">
+<h2 id="titulo-menu-lector"></h2>
+<ul>
+<li id="fila-menu-subir"><button class="item-menu-lector" id="menu-subir" type="button">
+<span data-icono="cloud-upload"></span><span data-i18n="saveCloud">Guardar en mi nube</span>
+</button></li>
+<li id="fila-menu-indice"><button class="item-menu-lector" id="menu-indice" type="button">
+<span data-icono="panel-left-text"></span><span>Mostrar el índice</span>
+</button></li>
+<li><button class="item-menu-lector" id="menu-anotaciones" type="button">
+<span data-icono="highlighter"></span><span data-i18n="annotations">Anotações</span>
+</button></li>
+<li><button class="item-menu-lector" id="menu-tts" type="button">
+<span data-icono="volume-2"></span><span data-i18n="readAloud">Leitura em voz alta</span>
+</button></li>
+<li><button class="item-menu-lector" id="menu-modo" type="button"></button></li>
+<li id="fila-menu-columnas"><button class="item-menu-lector" id="menu-columnas" type="button"></button></li>
+<li id="fila-menu-recorte"><button class="item-menu-lector" id="menu-recorte" type="button">
+<span data-icono="crop"></span><span data-i18n="cropMargins">Recortar los márgenes</span>
+</button></li>
+<li id="fila-menu-rotar"><button class="item-menu-lector" id="menu-rotar" type="button">
+<span data-icono="rotate-cw"></span><span data-i18n="rotatePage">Girar la página</span>
+</button></li>
+<li id="fila-menu-texto"><button class="item-menu-lector" id="menu-texto" type="button">
+<span data-icono="type"></span><span data-i18n="textSettings">Definições de texto</span>
+</button></li>
+<!-- Solo en EPUB: un PDF ya se puede imprimir descargándolo, y lo
+                 que aquí se compone es el texto que fluye del libro. -->
+<li id="fila-menu-imprimir"><button class="item-menu-lector" id="menu-imprimir" type="button">
+<span data-icono="printer"></span><span data-i18n="printBook">Imprimir ou guardar em PDF</span>
+</button></li>
+<li class="grupo-zoom-menu">
+<span data-i18n="zoom">Zoom</span>
+<div>
+<span class="grupo-zoom">
+<button class="btn-icono" data-i18n-title="zoomOut" data-icono="zoom-out" id="menu-zoom-menos" title="Reducir" type="button"></button>
+<button aria-haspopup="dialog" class="btn-icono btn-zoom-valor" id="menu-ancho-auto" type="button"></button>
+<button class="btn-icono" data-i18n-title="zoomIn" data-icono="zoom-in" id="menu-zoom-mas" title="Ampliar" type="button"></button>
+</span>
+<button class="btn-icono" data-i18n-title="fitPage" data-icono="maximize" id="menu-pagina-completa" title="Ajustar la página completa" type="button"></button>
+</div>
+</li>
+<li><button class="item-menu-lector" id="menu-inmersivo" type="button">
+<span data-icono="expand"></span><span data-i18n="immersive">Ler em ecrã inteiro</span>
+</button></li>
+<li class="fila-tiempo-menu oculto" id="fila-menu-tiempo">
+<span data-icono="clock"></span><span id="tiempo-restante-menu"></span>
+</li>
+</ul>
+</nav>
+</div>
+</header>
+<!-- En modo inmersivo la barra no está, así que la salida vive aquí fuera:
+         sin ella, con ratón se entraría a pantalla completa sin manera visible
+         de volver. Discreta hasta que se le acerca el puntero. -->
+<button class="btn-icono btn-salir-inmersivo" data-i18n-title="immersiveExit" data-icono="shrink" id="btn-salir-inmersivo" title="Salir de la pantalla completa" type="button"></button>
+<aside class="panel-flotante-lector panel-indice-libro oculto" id="panel-indice-libro">
+<div class="cabecera-panel-lector">
+<h2 data-i18n="bookIndex" id="titulo-panel-indice">Índice del libro</h2>
+<div aria-label="Navegación del libro" class="pestanas-panel oculto" data-i18n-aria-label="bookNavigation" id="pestanas-panel-indice" role="tablist">
+<button aria-controls="lista-indice-libro" aria-selected="true" class="pestana-panel" data-i18n="bookIndexShort" id="pestana-indice" role="tab" tabindex="0" type="button">Índice</button>
+<button aria-controls="rejilla-miniaturas" aria-selected="false" class="pestana-panel" data-i18n="thumbnails" id="pestana-miniaturas" role="tab" tabindex="-1" type="button">Miniaturas</button>
+</div>
+<button class="btn-icono" data-i18n-title="close" data-icono="x" id="cerrar-indice-libro" title="Cerrar" type="button"></button>
+</div>
+<ol aria-labelledby="pestana-indice" class="lista-indice-libro" id="lista-indice-libro" role="tabpanel"></ol>
+<div aria-labelledby="pestana-miniaturas" class="rejilla-miniaturas oculto" id="rejilla-miniaturas" role="tabpanel"></div>
+</aside>
+<div aria-controls="panel-indice-libro" aria-label="Cambiar el ancho del panel" aria-orientation="vertical" class="tirador-panel oculto" data-i18n-aria-label="resizePanel" data-i18n-title="resizePanel" id="tirador-indice" role="separator" tabindex="0" title="Cambiar el ancho del panel"></div>
+<div data-contenido-vista="" id="area-lectura" tabindex="-1">
+<aside class="panel-flotante-lector panel-marcadores oculto" id="panel-marcadores">
+<div class="cabecera-panel-lector">
+<h2 data-i18n="bookmarks">Marcadores</h2>
+<button class="btn-icono" data-i18n-title="close" data-icono="x" id="cerrar-marcadores" title="Cerrar" type="button"></button>
+</div>
+<form class="form-anadir-marcador" id="form-anadir-marcador">
+<label class="sr-solo" data-i18n="bookmarkName" for="nombre-marcador">Nome do marcador</label>
+<input autocomplete="off" data-i18n-placeholder="bookmarkNamePlaceholder" id="nombre-marcador" maxlength="120" placeholder="Nombre del marcador (opcional)" type="text"/>
+<button class="btn-primario btn-anadir-marcador" id="btn-anadir-marcador" type="submit">
+<span class="icono-boton" data-icono="bookmark-plus"></span>
+<span data-i18n="addBookmark">Añadir un marcador aquí</span>
+</button>
+</form>
+<p class="estado" data-i18n="noBookmarks" id="sin-marcadores">Ainda não há marcadores.</p>
+<ol class="lista-indice-libro" id="lista-marcadores"></ol>
+</aside>
+<aside class="panel-flotante-lector panel-anotaciones oculto" id="panel-anotaciones">
+<div class="cabecera-panel-lector">
+<h2 data-i18n="annotations">Anotações</h2>
+<button class="btn-icono oculto" data-i18n-title="exportAnnotations" data-icono="download" id="btn-exportar-anotaciones" title="Exportar as anotações (Markdown)" type="button"></button>
+<button class="btn-icono" data-i18n-title="close" data-icono="x" id="cerrar-anotaciones" title="Cerrar" type="button"></button>
+</div>
+<!-- La nota del libro entero, encima de las anotaciones sueltas: es el
+             sitio donde se buscan los apuntes propios sin salir del lector. -->
+<section class="nota-libro-lector" id="nota-libro-lector">
+<div class="cabecera-nota-lector">
+<h3 data-i18n="bookNote">Nota del libro</h3>
+<span class="estrellas oculto" id="estrellas-nota-lector"></span>
+<button class="btn-icono" data-i18n-title="editBookNote" data-icono="notebook-pen" id="btn-editar-nota-lector" title="Escrever a nota do livro" type="button"></button>
+</div>
+<p class="texto-nota-lector" id="texto-nota-lector"></p>
+</section>
+<div class="buscador buscador-anotaciones">
+<span data-icono="search"></span>
+<input autocomplete="off" data-i18n-placeholder="searchAnnotations" id="buscar-anotaciones" placeholder="Buscar en las anotaciones" type="search"/>
+</div>
+<p class="estado" data-i18n="noAnnotations" id="sin-anotaciones">Todavía no hay anotaciones.</p>
+<ol class="lista-anotaciones" id="lista-anotaciones"></ol>
+</aside>
+<aside class="panel-flotante-lector panel-busqueda-libro oculto" id="panel-busqueda-libro">
+<form class="buscador-form" id="form-busqueda-libro">
+<input autocomplete="off" data-i18n-placeholder="wordOrPhrase" id="buscar-en-libro" placeholder="Palabra o frase" type="search"/>
+<button class="btn-primario" data-i18n="search" type="submit">Buscar</button>
+<button class="btn-icono" data-i18n-title="close" data-icono="x" id="cerrar-busqueda-libro" title="Cerrar" type="button"></button>
+</form>
+<div class="estado" id="estado-busqueda-libro" role="status"></div>
+<ol class="resultados-busqueda" id="resultados-busqueda-libro"></ol>
+</aside>
+<div id="contenedor-pagina"></div>
+<div class="oculto" id="contenedor-epub"></div>
+<button class="zona-toque zona-izq" data-i18n-title="previous" id="zona-anterior" title="Página anterior"></button>
+<button class="zona-toque zona-der" data-i18n-title="next" id="zona-siguiente" title="Página siguiente"></button>
+<!-- Las mismas dos órdenes por arriba y por abajo, que es donde mucha
+           gente pulsa por costumbre de otros lectores. No llevan título ni
+           entran en el tabulador: repetirían lo que ya dicen las laterales, y
+           el tabulador y el lector de pantalla no ganan nada con el doble. -->
+<button aria-hidden="true" class="zona-toque zona-sup" id="zona-arriba" tabindex="-1"></button>
+<button aria-hidden="true" class="zona-toque zona-inf" id="zona-abajo" tabindex="-1"></button>
+<div aria-label="Ações para o texto selecionado" class="barra-seleccion oculto" data-i18n-aria-label="selectionActions" id="barra-seleccion" role="toolbar">
+<div aria-label="Cor do realce" class="colores-seleccion" data-i18n-aria-label="highlightColor" role="group">
+<button class="punto-color" data-color="amarillo" data-i18n-title="highlightYellow" title="Resaltar en amarillo" type="button"></button>
+<button class="punto-color" data-color="verde" data-i18n-title="highlightGreen" title="Realçar a verde" type="button"></button>
+<button class="punto-color" data-color="azul" data-i18n-title="highlightBlue" title="Resaltar en azul" type="button"></button>
+<button class="punto-color" data-color="rosa" data-i18n-title="highlightPink" title="Resaltar en rosa" type="button"></button>
+</div>
+<button class="btn-secundario" id="btn-nota-seleccion" type="button">
+<span data-icono="message-square-text"></span><span data-i18n="addNote">Añadir nota</span>
+</button>
+<button class="btn-icono" data-i18n-title="cancel" data-icono="x" id="btn-cancelar-seleccion" title="Cancelar" type="button"></button>
+</div>
+<div class="ventana-nota oculto" id="ventana-nota" role="tooltip"></div>
+<div class="menu-nota-contextual oculto" id="menu-nota-contextual" role="menu">
+<button class="item-menu-lector" id="accion-editar-nota" role="menuitem" type="button">
+<span data-icono="pencil"></span><span data-i18n="editNote">Editar nota</span>
+</button>
+<button class="item-menu-lector item-menu-peligro" id="accion-eliminar-nota" role="menuitem" type="button">
+<span data-icono="trash-2"></span><span data-i18n="deleteAnnotation">Borrar anotación</span>
+</button>
+</div>
+</div>
+<!-- Los datos de la lectura (capítulo, pantallas, tiempo) al pie, donde
+         caben sin disputarle sitio a los botones de la barra de arriba. Se
+         puede apagar en los ajustes; el contenido lo pone el JavaScript. -->
+<footer class="barra-estado-lector oculto" id="barra-estado-lector"></footer>
+<!-- Mientras suena la lectura en voz alta: pausar está a un toque sin
+         volver a abrir el panel, que taparía el texto que se está siguiendo.
+         En pantalla pequeña el altavoz vive en el menú «⋯», así que este es el
+         único sitio donde la pausa se ve siempre. -->
+<div class="control-voz" hidden="" id="control-voz">
+<button class="btn-voz" id="btn-voz-pausa" type="button"></button>
+<button aria-label="Parar" class="btn-voz btn-voz-icono" data-i18n-aria-label="ttsStop" data-i18n-title="ttsStop" data-icono="square" id="btn-voz-detener" title="Parar" type="button"></button>
+</div>
+</section>
+<!-- ═══════════ AJUSTES ═══════════ -->
+<section class="vista oculto" id="vista-ajustes">
+<header class="cabecera">
+<button class="btn-icono" data-i18n-title="back" data-icono="arrow-left" id="btn-cerrar-ajustes" title="Volver"></button>
+<h1 data-foco-vista="" data-i18n="settings" tabindex="-1">Ajustes</h1>
+</header>
+<main class="contenido" data-contenido-vista="" tabindex="-1">
+<!-- Los ajustes van por pestañas: en una sola lista, la nube, la
+           biblioteca, el lector y las copias se mezclaban y había que
+           recorrerla entera para encontrar cualquier cosa. -->
+<div aria-label="Secciones de los ajustes" class="pestanas" data-grupo="ajustes" data-i18n-aria-label="settingsSections" role="tablist">
+<button aria-controls="panel-ajustes-nube" aria-selected="true" class="pestana" data-i18n="webdavShort" data-panel="nube" id="pestana-ajustes-nube" role="tab" type="button">Nuvem</button>
+<button aria-controls="panel-ajustes-datos" aria-selected="false" class="pestana" data-i18n="settingsData" data-panel="datos" id="pestana-ajustes-datos" role="tab" tabindex="-1" type="button">Datos</button>
+<button aria-controls="panel-ajustes-biblioteca" aria-selected="false" class="pestana" data-i18n="library" data-panel="biblioteca" id="pestana-ajustes-biblioteca" role="tab" tabindex="-1" type="button">Biblioteca</button>
+<button aria-controls="panel-ajustes-lector" aria-selected="false" class="pestana" data-i18n="reader" data-panel="lector" id="pestana-ajustes-lector" role="tab" tabindex="-1" type="button">Leitor</button>
+</div>
+<div aria-labelledby="pestana-ajustes-nube" class="panel-pestana" id="panel-ajustes-nube" role="tabpanel" tabindex="0">
+<form class="tarjeta" id="formulario-webdav">
+<h2 data-i18n="webdav">Nuvem (WebDAV)</h2>
+<p class="ayuda" data-i18n-html="webdavHelpHtml">Compatible con Nextcloud, ownCloud y cualquier servidor WebDAV. Los PDF de la carpeta indicada aparecerán en tu biblioteca y la posición de lectura se sincronizará entre todos tus dispositivos. ¿No sabes qué poner aquí? <a href="#" id="enlace-ayuda-ajustes">Lee la ayuda</a>.</p>
+<label><span data-i18n="webdavFolder">URL da pasta WebDAV</span>
+<input autocomplete="url" id="campo-url" placeholder="https://tu-nube.com/remote.php/dav/files/USUARIO/Libros" type="url"/>
+</label>
+<label><span data-i18n="user">Usuario</span>
+<input autocomplete="username" id="campo-usuario" type="text"/>
+</label>
+<label><span data-i18n="appPassword">Contraseña de aplicación</span>
+<input autocomplete="current-password" id="campo-clave" type="password"/>
+</label>
+<p class="ayuda" data-i18n-html="passwordHelpHtml">⚠️ En Nextcloud crea una <strong>contraseña de aplicación</strong> (Ajustes → Seguridad), no uses tu contraseña principal. Además, para que el navegador pueda conectar, el servidor debe permitir CORS: en Nextcloud instala la app <strong>WebAppPassword</strong> y añade el dominio de este lector. Los datos se guardan únicamente en este navegador.</p>
+<div class="fila-botones">
+<button class="btn-secundario" data-i18n="testConnection" id="btn-probar" type="button">Testar ligação</button>
+<button class="btn-primario" data-i18n="save" type="submit">Guardar</button>
+<button class="btn-peligro" data-i18n="deleteConfig" id="btn-borrar-config" type="button">Borrar configuración</button>
+</div>
+<div class="estado" id="resultado-prueba" role="status"></div>
+</form>
+<div class="tarjeta">
+<h2 data-i18n="transferConfig">Llevar la configuración a otro dispositivo</h2>
+<p class="ayuda" data-i18n="transferHelp">Pode copiar uma hiperligação ou guardar um ficheiro com o URL, o utilizador e a palavra-passe de aplicação, e abri-lo noutro dispositivo. ⚠️ A hiperligação e o ficheiro permitem aceder à sua nuvem: guarde-os em privado e elimine as cópias de que já não precisa.</p>
+<div class="fila-botones">
+<button class="btn-secundario" data-i18n="copyConfig" id="btn-copiar-config" type="button">Copiar hiperligação de configuração</button>
+<button class="btn-secundario" data-i18n="exportConfigFile" id="btn-descargar-config" type="button">Guardar configuración</button>
+<label class="btn-secundario" data-i18n="importConfigFile" for="selector-importar-config">Restaurar configuração</label>
+<input accept=".json,application/json" hidden="" id="selector-importar-config" type="file"/>
+</div>
+<div class="estado" id="resultado-copia" role="status"></div>
+</div>
+<div class="tarjeta" id="tarjeta-dispositivos">
+<h2 data-i18n="devices">Dispositivos ligados</h2>
+<p class="ayuda" data-i18n="devicesHelp">Os navegadores que estão a usar esta biblioteca, com a última vez que sincronizaram. Se vir um que não reconhece, mude a palavra-passe de aplicação.</p>
+<ul class="lista-dispositivos" id="lista-dispositivos"></ul>
+<p class="ayuda" data-i18n="devicesRevokeHelp">⚠️ «Desligar» pede ao dispositivo para esquecer a configuração da nuvem e voltar a pedi-la, e só produz efeito na próxima vez que abrir aí. Não retira o acesso ao servidor: para isso, elimine a palavra-passe de aplicação na sua nuvem.</p>
+</div>
+</div>
+<div aria-labelledby="pestana-ajustes-datos" class="panel-pestana" id="panel-ajustes-datos" role="tabpanel" tabindex="0">
+<div class="tarjeta">
+<h2 data-i18n="stats">Estatísticas de leitura</h2>
+<p class="ayuda" data-i18n="statsSettingsHelp">O tempo que dedica a ler, os dias seguidos que leva e os livros a que dedica mais tempo, somando todos os seus dispositivos.</p>
+<label class="casilla">
+<input id="casilla-sin-estadisticas-ajustes" type="checkbox"/>
+<span data-i18n="statsOptOut">Não medir o tempo de leitura</span>
+</label>
+<p class="ayuda" data-i18n="statsOptOutHelp">Deixa de contar o tempo, os dias seguidos e o tempo dedicado a cada livro. Ao ativar, é eliminado o que estiver registado até agora, sem possibilidade de recuperação. Com a nuvem configurada, a decisão chega também aos seus outros dispositivos: deixam de medir assim que sincronizam.</p>
+<div class="fila-botones">
+<button class="btn-secundario" data-i18n="statsView" id="btn-ver-estadisticas" type="button">Ver las estadísticas</button>
+</div>
+<div class="estado" id="resumen-estadisticas" role="status"></div>
+</div>
+<div class="tarjeta">
+<h2 data-i18n="activityLog">Registo de atividade</h2>
+<p class="ayuda" data-i18n="activityLogHelp">Regista se a posição de leitura chega ao servidor e os erros que o impedem. Serve para perceber por que razão um livro ficou atrasado noutro dispositivo. Guarda-se apenas aqui, nunca sai deste aparelho e apaga-se sozinho ao fim de uma semana.</p>
+<div class="fila-botones">
+<button class="btn-secundario" data-i18n="viewLog" id="btn-ver-registro" type="button">Ver o registo</button>
+</div>
+<div class="estado" id="resumen-registro" role="status"></div>
+</div>
+</div>
+<div aria-labelledby="pestana-ajustes-biblioteca" class="panel-pestana" id="panel-ajustes-biblioteca" role="tabpanel" tabindex="0">
+<div class="tarjeta">
+<h2 data-i18n="library">Biblioteca</h2>
+<label class="casilla">
+<input checked="" id="casilla-continuar" type="checkbox"/>
+<span data-i18n="showContinueReading">Mostrar «Continuar leyendo»</span>
+</label>
+<p class="ayuda" data-i18n="showContinueReadingHelp">O quadro com as suas últimas leituras, por cima da biblioteca. Ao escondê-lo, os livros continuam onde estavam e mantêm a sua página.</p>
+<label class="campo-ajuste"><span data-i18n="recentCount">Cuántas lecturas mostrar</span>
+<select id="cuantas-recientes">
+<option data-i18n="recentAuto" value="auto">Las que quepan</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="6">6</option>
+<option value="8">8</option>
+</select>
+</label>
+<p class="ayuda" data-i18n="recentCountHelp">«As que couberem» mostra três ou quatro consoante a largura do ecrã. As restantes ficam a um toque, em «Ver mais».</p>
+<label class="casilla">
+<input id="casilla-abrir-ultimo-ajustes" type="checkbox"/>
+<span data-i18n="openLastOnStart">Abrir a última leitura ao iniciar o EduReader</span>
+</label>
+<p class="ayuda" data-i18n="openLastOnStartHelp">Ao abrir a aplicação vai diretamente para o livro que estava a ler, sem passar pela biblioteca. É lembrado apenas neste dispositivo: nos outros continuará a chegar à biblioteca.</p>
+</div>
+<div class="tarjeta">
+<h2 data-i18n="autoTheme">O tema do sistema</h2>
+<p class="ayuda" data-i18n="autoThemeHelp">Quando o tema está em «o do sistema», a aplicação clareia ou escurece com o resto do dispositivo. Aqui escolhe com que tema o faz de cada lado. Os cinco temas continuam à mão no botão do cabeçalho; isto só decide para qual vai «o do sistema».</p>
+<div class="rejilla-ajustes">
+<label class="campo-ajuste"><span data-i18n="autoThemeLight">Quando o sistema está claro</span>
+<select id="tema-auto-claro">
+<option data-i18n="themeLight" value="claro">Claro</option>
+<option data-i18n="themeSepia" value="sepia">Sepia</option>
+</select>
+</label>
+<label class="campo-ajuste"><span data-i18n="autoThemeDark">Quando o sistema está escuro</span>
+<select id="tema-auto-oscuro">
+<option data-i18n="themeDark" value="oscuro">Escuro</option>
+<option data-i18n="themeBlack" value="negro">Negro</option>
+</select>
+</label>
+</div>
+<!-- Las muestras enseñan cada tema aquí mismo: si no, la única forma de
+             ver cómo queda el lado que ahora no toca sería cambiar el tema del
+             propio sistema operativo. -->
+<div aria-hidden="true" class="muestras-tema">
+<div class="muestra-tema" data-tema="claro" id="muestra-tema-claro">
+<div class="muestra-cabecera"><span class="muestra-titulo"></span><span class="muestra-punto"></span></div>
+<div class="muestra-pagina"><span></span><span></span><span></span></div>
+</div>
+<div class="muestra-tema" data-tema="oscuro" id="muestra-tema-oscuro">
+<div class="muestra-cabecera"><span class="muestra-titulo"></span><span class="muestra-punto"></span></div>
+<div class="muestra-pagina"><span></span><span></span><span></span></div>
+</div>
+</div>
+<p class="ayuda" id="estado-tema-auto" role="status"></p>
+</div>
+<div class="tarjeta">
+<h2 data-i18n="cleanup">Livros que já não estão lá</h2>
+<p class="ayuda" data-i18n="cleanupHelp">Quando um livro desaparece da nuvem, a sua marca de leitura, marcadores e notas ficam aqui. Primeiro é assinalado como em falta e só depois é eliminado, caso o livro estivesse fora de alcance por algum tempo.</p>
+<label class="campo-ajuste"><span data-i18n="cleanupDays">Quanto tempo esperar antes de os eliminar</span>
+<select id="dias-limpieza">
+<option data-i18n="cleanupNever" value="0">Nunca os eliminar</option>
+<option data-i18n="cleanupDays7" value="7">Uma semana</option>
+<option data-i18n="cleanupDays15" value="15">Quince días</option>
+<option data-i18n="cleanupDays30" value="30">Un mes</option>
+<option data-i18n="cleanupDays60" value="60">Dois meses</option>
+<option data-i18n="cleanupDays90" value="90">Tres meses</option>
+</select>
+</label>
+<p class="ayuda" data-i18n="cleanupDaysHelp">Este prazo é partilhado com os seus outros dispositivos, para que todos eliminem no mesmo dia.</p>
+<div class="informe-limpieza" id="informe-limpieza" role="status"></div>
+<div class="fila-botones">
+<button class="btn-secundario" data-i18n="cleanupCheck" id="btn-comprobar-limpieza" type="button">Verificar a nuvem</button>
+<button class="btn-peligro oculto" data-i18n="cleanupNow" id="btn-limpiar-ahora" type="button">Borrar ahora</button>
+</div>
+</div>
+</div>
+<div aria-labelledby="pestana-ajustes-lector" class="panel-pestana" id="panel-ajustes-lector" role="tabpanel" tabindex="0">
+<div class="tarjeta">
+<h2 data-i18n="columnsSettings">Colunas</h2>
+<p class="ayuda" data-i18n="columnsSettingsHelp">Em quantas colunas o texto se reparte no ecrã. No automático cabem as que couberem sem que as linhas fiquem incómodas, e mudam sozinhas ao girar o aparelho ou ao mexer no tamanho da letra. Com um livro aberto, o botão das colunas muda o desse livro; o daqui é com que começam os outros. Isto não viaja para os outros dispositivos: cada ecrã é um caso.</p>
+<div class="rejilla-ajustes">
+<label class="campo-ajuste"><span data-i18n="columnsSettings">Colunas</span>
+<select id="columnas-epub-ajustes">
+<option data-i18n="columnsAuto" value="auto">Automáticas</option>
+<option data-i18n="columnsOne" value="1">Uma coluna</option>
+<option data-i18n="columnsTwo" value="2">Dos columnas</option>
+<option data-i18n="columnsThree" value="3">Três colunas</option>
+<option data-i18n="columnsFour" value="4">Cuatro columnas</option>
+</select>
+</label>
+</div>
+<div class="cabecera-margenes">
+<label data-i18n="lineLength" for="letras-linea">Linhas de no máximo</label>
+<output for="letras-linea" id="valor-letras-linea">45 letras</output>
+</div>
+<input id="letras-linea" max="90" min="30" step="5" type="range" value="45"/>
+<div aria-hidden="true" class="extremos-margen">
+<span data-i18n="moreColumns">Mais colunas</span><span data-i18n="fewerColumns">Menos columnas</span>
+</div>
+<p class="ayuda" data-i18n="lineLengthHelp">Só conta no automático: abre-se outra coluna assim que o texto dá para que nenhuma passe desse comprimento. Com linhas curtas aparecem mais cedo; com linhas longas, mais tarde.</p>
+</div>
+<div class="tarjeta">
+<h2 data-i18n="epubTextSettings">Texto dos EPUB</h2>
+<p class="ayuda" data-i18n="epubTextSettingsHelp">Como o texto dos livros EPUB é composto (os PDF chegam já paginados e não aceitam estas alterações). Os mesmos ajustes estão à mão enquanto lê, no botão da letra. Aqui decide com que começa cada livro novo: a margem e o alinhamento que altere com um livro aberto são só desse livro.</p>
+<div class="rejilla-ajustes">
+<label class="campo-ajuste"><span data-i18n="fontFamily">Tipo de letra</span>
+<select id="fuente-epub-ajustes">
+<option data-i18n="bookFont" value="libro">A do livro</option>
+<option data-i18n="serifFont" value="serif">Con serifa</option>
+<option data-i18n="sansFont" value="sans">Sin serifa</option>
+</select>
+</label>
+<label class="campo-ajuste"><span data-i18n="hyphenation">Dividir palavras</span>
+<select id="guionado-epub-ajustes">
+<option data-i18n="hyphenationAuto" value="auto">Sí, al final de línea</option>
+<option data-i18n="hyphenationBook" value="libro">Como no livro</option>
+<option data-i18n="hyphenationNever" value="nunca">No partir</option>
+</select>
+</label>
+<label class="campo-ajuste"><span data-i18n="textAlignment">Alinhamento</span>
+<select id="alineacion-epub-ajustes">
+<option data-i18n="bookAlignment" value="libro">La del libro</option>
+<option data-i18n="unjustifiedAlignment" value="izquierda">Não justificado</option>
+<option data-i18n="justifiedAlignment" value="justificada">Justificado</option>
+</select>
+</label>
+<label class="campo-ajuste"><span data-i18n="lineSpacing">Entrelinha</span>
+<select id="interlineado-epub-ajustes">
+<option data-i18n="bookSpacing" value="libro">El del libro</option>
+<option data-i18n="spacingCompact" value="1.3">Compacto</option>
+<option data-i18n="spacingNormal" value="1.5">Normal</option>
+<option data-i18n="spacingWide" value="1.8">Amplio</option>
+<option data-i18n="spacingWider" value="2.1">Muy amplio</option>
+</select>
+</label>
+</div>
+<div class="cabecera-margenes">
+<label data-i18n="marginSide" for="margen-epub-ajustes">Margem lateral</label>
+<output for="margen-epub-ajustes" id="valor-margen-ajustes">10 % por lado</output>
+</div>
+<input id="margen-epub-ajustes" max="30" min="0" step="1" type="range" value="10"/>
+<div aria-hidden="true" class="extremos-margen">
+<span data-i18n="noMargin">Sin margen</span><span data-i18n="moreMargin">Más margen</span>
+</div>
+<div class="fila-botones">
+<button class="btn-secundario" id="btn-restablecer-texto-ajustes" type="button">
+<span data-i18n="resetTextSettings">Repor o texto</span>
+</button>
+</div>
+</div>
+<div class="tarjeta">
+<h2 data-i18n="readerScreen">En pantalla</h2>
+<label class="casilla">
+<input checked="" id="casilla-barra-estado" type="checkbox"/>
+<span data-i18n="showStatusBar">Mostrar la barra de datos al pie</span>
+</label>
+<p class="ayuda" data-i18n="showStatusBarHelp">A linha no fundo do leitor com a página do capítulo, o ecrã do livro, a percentagem lida e o tempo que falta. Ao escondê-la, ganha-se um pouco de altura para o texto.</p>
+</div>
+</div>
+<!-- Qué versión se está usando. Fuera de las pestañas, al pie de los
+           ajustes: es lo que hace falta poder decir al informar de un fallo. -->
+<p class="ayuda version-app" id="version-app"></p>
+</main>
+</section>
+<!-- ═══════════ IMPORTAR Y EXPORTAR ═══════════ -->
+<section class="vista oculto" id="vista-archivos">
+<header class="cabecera">
+<button class="btn-icono" data-i18n-title="back" data-icono="arrow-left" id="btn-cerrar-archivos" title="Volver"></button>
+<h1 data-foco-vista="" data-i18n="importExport" tabindex="-1">Importar e exportar</h1>
+</header>
+<main class="contenido" data-contenido-vista="" tabindex="-1">
+<div class="tarjeta">
+<h2 data-i18n="addBooks">Añadir libros</h2>
+<p class="ayuda" data-i18n="addBooksHelp">Adicione PDF ou EPUB ao dispositivo ou envie-os para a pasta da nuvem que tenha aberta.</p>
+<div class="fila-botones">
+<label class="btn-secundario" data-i18n="addToDevice" for="selector-archivo">Adicionar ao dispositivo</label>
+<label class="btn-secundario accion-carpeta" data-i18n="addFolderToDevice" for="selector-carpeta">Adicionar uma pasta ao dispositivo</label>
+<label class="btn-secundario" data-i18n="uploadToCloud" for="selector-subir-nube" id="accion-subir-desde-archivos">Subir a la nube</label>
+<label class="btn-secundario accion-carpeta" data-i18n="uploadFolderToCloud" for="selector-subir-carpeta-nube" id="accion-subir-carpeta-desde-archivos">Subir una carpeta a la nube</label>
+</div>
+</div>
+<div class="tarjeta">
+<h2 data-i18n="localBackup">Biblioteca deste dispositivo</h2>
+<p class="ayuda" data-i18n="localBackupHelp">Guarda num ZIP os livros de «Neste dispositivo», o seu progresso, marcadores, anotações e preferências. Não inclui a configuração nem a palavra-passe da nuvem; pode guardá-las à parte em Definições.</p>
+<div class="fila-botones">
+<button class="btn-secundario" data-i18n="exportLocalBackup" id="btn-exportar-biblioteca" type="button">Criar cópia</button>
+<label class="btn-secundario" data-i18n="restoreLocalBackup" for="selector-restaurar-biblioteca">Restaurar en el dispositivo</label>
+<input accept=".zip,application/zip,application/x-zip-compressed" hidden="" id="selector-restaurar-biblioteca" type="file"/>
+</div>
+<div class="estado" id="resultado-copia-biblioteca" role="status"></div>
+</div>
+<div class="tarjeta" id="tarjeta-copia-nube">
+<h2 data-i18n="cloudBackup">Biblioteca da nuvem</h2>
+<p class="ayuda" data-i18n="cloudBackupHelp">Guarda num ZIP todos os PDF e EPUB da pasta WebDAV e das suas subpastas, juntamente com o progresso, os marcadores e as anotações.</p>
+<div class="fila-botones">
+<button class="btn-secundario" data-i18n="exportCloudBackup" id="btn-exportar-nube" type="button">Criar cópia da nuvem</button>
+<label class="btn-secundario" data-i18n="restoreCloudBackup" for="selector-restaurar-nube" id="accion-restaurar-nube">Restaurar en la nube</label>
+<input accept=".zip,application/zip,application/x-zip-compressed" hidden="" id="selector-restaurar-nube" type="file"/>
+</div>
+<div class="estado" id="resultado-copia-nube" role="status"></div>
+</div>
+</main>
+</section>
+<!-- ═══════════ ESTADÍSTICAS DE LECTURA ═══════════ -->
+<section class="vista oculto" id="vista-estadisticas">
+<header class="cabecera">
+<button class="btn-icono" data-i18n-title="back" data-icono="arrow-left" id="btn-cerrar-estadisticas" title="Volver"></button>
+<h1 data-foco-vista="" data-i18n="stats" tabindex="-1">Estatísticas de leitura</h1>
+</header>
+<main class="contenido" data-contenido-vista="" tabindex="-1">
+<div class="tarjeta oculto" id="estadisticas-vacio">
+<h2 data-i18n="statsEmptyTitle">Ainda não há nada a mostrar</h2>
+<p class="ayuda" data-i18n="statsEmpty">Assim que ler uns minutos com um livro aberto, aqui aparecerão o tempo dedicado, os dias seguidos que leva a ler e os livros a que dedica mais tempo.</p>
+</div>
+<!-- Apagadas a propósito: si no se dijera, esta pantalla se leería como
+           «no has leído nada» en lugar de «no se está midiendo». -->
+<div class="tarjeta oculto" id="estadisticas-apagadas">
+<h2 data-i18n="statsOffTitle">Não se está a medir nada</h2>
+<p class="ayuda" data-i18n="statsOff">Tem desativada a contagem do tempo de leitura. Pode voltar a ativá-la aqui em baixo, em «Estes dados»; a contagem recomeça do zero.</p>
+</div>
+<div id="estadisticas-contenido">
+<div class="tarjeta">
+<h2 data-i18n="statsSummary">A sua leitura</h2>
+<p class="ayuda oculto" data-i18n="statsShared" id="nota-varios-dispositivos">Soma de todos os seus dispositivos: o que leu no telemóvel e no computador conta em conjunto, e um dia em que tenha lido em ambos conta como um só dia.</p>
+<ul class="cifras-estadisticas" id="cifras-estadisticas"></ul>
+</div>
+<div class="tarjeta">
+<div class="cabecera-periodos">
+<h2 data-i18n="statsLastDays" id="titulo-grafico">Los últimos 30 días</h2>
+<div aria-label="Agrupar por" class="grupo-vista grupo-periodos" data-i18n-aria-label="statsGroupBy" id="grupo-periodos" role="group">
+<button aria-pressed="true" data-i18n="statsByDay" data-periodo="dia" type="button">Dias</button>
+<button aria-pressed="false" data-i18n="statsByWeek" data-periodo="semana" type="button">Semanas</button>
+<button aria-pressed="false" data-i18n="statsByMonth" data-periodo="mes" type="button">Meses</button>
+<button aria-pressed="false" data-i18n="statsByYear" data-periodo="anno" type="button">Años</button>
+</div>
+</div>
+<div class="grafico-dias" id="grafico-estadisticas" role="img"></div>
+<p class="ayuda" id="pie-grafico"></p>
+<!-- El tramo en curso frente al anterior: es la comparación que se
+               busca al mirar estas cifras, y con las barras solas hay que
+               adivinarla a ojo. -->
+<div class="comparacion-periodos oculto" id="comparacion-periodos">
+<div class="lado-comparacion">
+<span class="etiqueta-comparacion" id="etiqueta-periodo-actual"></span>
+<strong class="valor-comparacion" id="valor-periodo-actual"></strong>
+</div>
+<div class="lado-comparacion">
+<span class="etiqueta-comparacion" id="etiqueta-periodo-anterior"></span>
+<span class="valor-comparacion suave" id="valor-periodo-anterior"></span>
+</div>
+<span class="variacion-periodos" id="variacion-periodos"></span>
+</div>
+</div>
+<div class="tarjeta" id="tarjeta-libros-estadisticas">
+<div class="cabecera-periodos">
+<h2 data-i18n="statsTopBooks">Onde vai o tempo</h2>
+<label class="campo-ajuste campo-orden-libros">
+<span data-i18n="statsSortBy">Ordenar por</span>
+<select id="orden-libros-estadisticas">
+<option data-i18n="statsSortTime" value="tiempo">Tiempo dedicado</option>
+<option data-i18n="statsSortRecent" value="reciente">Última leitura</option>
+<option data-i18n="statsSortTitle" value="titulo">Título</option>
+</select>
+</label>
+</div>
+<ul class="lista-estadisticas-libros" id="libros-estadisticas"></ul>
+</div>
+</div>
+<div class="tarjeta">
+<h2 data-i18n="statsDataTitle">Estos datos</h2>
+<p class="ayuda" data-i18n="statsPrivacy">Com uma nuvem configurada, o tempo de leitura viaja com a posição de leitura: cada dispositivo regista o seu e aqui mostra-se a soma, para saber quanto tempo demorou a ler um livro mesmo que o tenha lido aos poucos em cada aparelho. Ficam no seu próprio servidor WebDAV, junto com os seus livros, e nunca são enviados para mais lado nenhum. Sem nuvem configurada, ficam neste navegador. Só conta o tempo com o livro à frente: enquanto a aplicação não está à vista o relógio para, e os saltos de posição não são somados. De cada página contam-se no máximo cinco minutos; passado esse tempo a barra do fundo avisa que está em pausa, e volta a contar ao mudar de página.</p>
+<label class="casilla">
+<input id="casilla-sin-estadisticas" type="checkbox"/>
+<span data-i18n="statsOptOut">Não medir o tempo de leitura</span>
+</label>
+<p class="ayuda" data-i18n="statsOptOutHelp">Deixa de contar o tempo, os dias seguidos e o tempo dedicado a cada livro. Ao ativar, é eliminado o que estiver registado até agora, sem possibilidade de recuperação. Com a nuvem configurada, a decisão chega também aos seus outros dispositivos: deixam de medir assim que sincronizam.</p>
+<div class="fila-botones">
+<button class="btn-peligro" data-i18n="statsDelete" id="btn-borrar-estadisticas" type="button">Eliminar as estatísticas</button>
+</div>
+<div class="estado" id="resultado-estadisticas" role="status"></div>
+</div>
+</main>
+</section>
+<!-- ═══════════ AYUDA ═══════════ -->
+<section class="vista oculto" id="vista-ayuda">
+<header class="cabecera">
+<button class="btn-icono" data-i18n-title="back" data-icono="arrow-left" id="btn-cerrar-ayuda" title="Volver"></button>
+<h1 data-foco-vista="" data-i18n="help" tabindex="-1">Ayuda</h1>
+</header>
+<main class="contenido" data-contenido-vista="" data-i18n-ayuda="" id="contenido-ayuda" tabindex="-1">
+<div aria-label="Secciones de la ayuda" class="pestanas" data-grupo="ayuda" role="tablist">
+<button aria-controls="panel-ayuda-empezar" aria-selected="true" class="pestana" data-panel="empezar" role="tab" type="button">Primeros pasos</button>
+<button aria-controls="panel-ayuda-biblioteca" aria-selected="false" class="pestana" data-panel="biblioteca" role="tab" tabindex="-1" type="button">Biblioteca</button>
+<button aria-controls="panel-ayuda-lector" aria-selected="false" class="pestana" data-panel="lector" role="tab" tabindex="-1" type="button">Lector</button>
+<button aria-controls="panel-ayuda-nube" aria-selected="false" class="pestana" data-panel="nube" role="tab" tabindex="-1" type="button">Nube</button>
+<button aria-controls="panel-ayuda-privacidad" aria-selected="false" class="pestana" data-panel="privacidad" role="tab" tabindex="-1" type="button">Privacidad</button>
+</div>
+<div aria-label="Primeros pasos" class="panel-pestana" id="panel-ayuda-empezar" role="tabpanel" tabindex="0">
+<div class="tarjeta">
+<h2>¿Qué hace EduReader?</h2>
+<p>Lee tus libros en PDF y EPUB (con fórmulas matemáticas incluidas)
+        desde el móvil, la tablet o el ordenador y recuerda por dónde vas.
+        Hay dos formas de usarlo:</p>
+<ul class="lista-ayuda">
+<li><strong>Añadir un libro de tu dispositivo (botón «+»):</strong>
+          funciona al instante, sin cuentas ni ajustes. El libro queda guardado
+          en la biblioteca de ese navegador y se recuerda por dónde vas. Única
+          pega: todo se guarda solo en ese dispositivo. También puedes arrastrar
+          uno o varios PDF o EPUB hasta la sección local.</li>
+<li><strong>Añadir una carpeta entera:</strong> el botón de la carpeta
+          con la flecha (y el mismo gesto de arrastrar una carpeta hasta la
+          sección) copia todos los PDF y EPUB que haya dentro, incluidas sus
+          subcarpetas, y rehace esa misma estructura en la biblioteca. Funciona
+          igual con la nube, donde las carpetas se crean en el servidor.</li>
+<li><strong>Conectar una nube (WebDAV):</strong> tus libros y tu
+          posición de lectura se sincronizan entre todos tus dispositivos.
+          Necesita una configuración previa que se explica más abajo.</li>
+</ul>
+</div>
+<div class="tarjeta">
+<h2>Claro, sepia, oscuro y negro</h2>
+<p>El botón del tema, en la cabecera, abre un menú con cinco opciones:
+        <strong>el del sistema</strong> (círculo mitad claro mitad oscuro),
+        <strong>claro</strong> (sol), <strong>sepia</strong> (taza),
+        <strong>oscuro</strong> (luna) y <strong>negro</strong> (luna con
+        estrella). El icono del botón te dice en cuál estás y tu elección se
+        recuerda en ese navegador. De partida se usa el del sistema, así que la
+        aplicación se aclara u oscurece cuando lo hace el resto del
+        dispositivo.</p>
+<p class="ayuda">El tema es también el papel con el que se lee: claro es
+        papel blanco, sepia el tostado de los lectores de tinta electrónica,
+        oscuro el modo noche de la página y negro ese mismo modo noche llevado
+        al negro puro, que en las pantallas OLED apaga el píxel y gasta menos
+        batería.</p>
+<p class="ayuda">Con «el del sistema» puedes decidir a qué tema va cada
+        lado: sepia en vez de claro de día, o negro en vez de oscuro de noche.
+        Se elige en <em>⚙️ Ajustes → Biblioteca</em>, con una muestra de cada
+        uno para verlos sin cambiar el tema del dispositivo.</p>
+</div>
+</div>
+<div aria-label="Biblioteca" class="panel-pestana" hidden="" id="panel-ayuda-biblioteca" role="tabpanel" tabindex="0">
+<div class="tarjeta">
+<h2>Tus libros a la vista</h2>
+<div class="puntos-ayuda">
+<details class="punto-ayuda">
+<summary>Continuar leyendo</summary>
+<p>
+          el último libro aparece destacado. En pantalla ancha las lecturas recientes
+          se ven como fichas con la portada grande y el título completo, todas a la
+          vez; en pantalla estrecha se despliegan con «Ver más». Puedes quitar las que
+          ya no quieras ver; en <em>⚙️ Ajustes → Biblioteca</em> se elige cuántas
+          enseñar y se apaga el recuadro entero, si prefieres ir directamente a tus
+          libros. Solo aparece en la pantalla inicial: al entrar en una carpeta se
+          retira para dejar sitio a lo que hay dentro. Un libro descartado vuelve a
+          aparecer cuando lo abres de nuevo. Los terminados y los archivos que ya no
+          existen quedan fuera de esta lista. La casilla del final del recuadro hace que
+          EduReader se abra directamente en tu última lectura, sin pasar por la
+          biblioteca; solo vale para este dispositivo, así que puedes tenerla puesta en
+          el móvil y no en el ordenador. El menú «⋯» de cada ficha ofrece lo mismo
+          que en la biblioteca (renombrar, mover, subir o guardar, sin conexión,
+          borrar…), así que no hace falta bajar a buscar el libro para hacerle algo.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Orden y estados</summary>
+<p>
+          puedes ordenar por lectura reciente, título, autor o progreso, filtrar los
+          libros pendientes, en lectura o terminados y marcar cualquiera como
+          terminado. Pulsa la propia etiqueta «Terminado» para quitarla; también se
+          quitará automáticamente si vuelves a abrir el libro, sin perder el progreso.
+          Un libro con 0 % leído se considera pendiente aunque se haya abierto.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Portadas</summary>
+<p>
+          se generan solas (la cubierta del EPUB o la primera página del PDF) y
+          muestran el avance de lectura de cada libro. El buscador de la biblioteca
+          filtra por nombre, título, autor, formato y otros metadatos disponibles. En
+          móvil, mantén pulsado un título cortado para verlo completo.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Resumen del libro</summary>
+<p>
+          si el archivo trae una sinopsis en sus metadatos (la descripción del EPUB o
+          el «asunto» del PDF), aparece en un recuadro al dejar el ratón sobre la
+          ficha, tanto en «Continuar leyendo» como en las dos bibliotecas, y también
+          bajo el título en el menú «⋯», que es como se lee en pantalla táctil.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Libro de ejemplo</summary>
+<p>
+          cuando la biblioteca está completamente vacía puedes añadir y abrir una obra
+          de muestra en el idioma de la interfaz. Después funciona como cualquier libro
+          local.</p>
+</details>
+</div>
+</div>
+<div class="tarjeta">
+<h2>Carpetas</h2>
+<div class="puntos-ayuda">
+<details class="punto-ayuda">
+<summary>Carpetas del dispositivo</summary>
+<p>
+          la sección «En este dispositivo» también se puede organizar en carpetas con
+          el botón de la carpeta con «+». Entra en ellas pulsándolas (la ruta aparece
+          encima de la lista para volver), cambia su nombre o bórralas desde su menú
+          «⋯», y mueve un libro con su opción «Mover a otra carpeta» o arrastrándolo
+          hasta la carpeta. Las carpetas también se mueven: con «Mover la carpeta» o
+          arrastrándolas hasta otra carpeta o hasta un tramo de la ruta, llevándose
+          todo lo que hay dentro. Mover un libro aquí no le afecta en nada: conserva la
+          página, los marcadores y las anotaciones. Los libros nuevos van a parar a la
+          carpeta que tengas abierta, y el buscador sigue encontrándolos estén donde
+          estén.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Carpetas en la nube</summary>
+<p>
+          la sección «En la nube» muestra las subcarpetas de tu carpeta y permite
+          entrar en ellas (la ruta aparece encima de la lista para volver). Puedes
+          crear carpetas nuevas, cambiarles el nombre o borrarlas desde su menú «⋯» (al
+          borrarlas se elimina también el contenido) y mover un libro de una carpeta a
+          otra con su botón de mover o arrastrándolo hasta una carpeta de la lista (o
+          hasta un tramo de la ruta), conservando el progreso y los marcadores. Las
+          carpetas también se mueven: usa «Mover la carpeta» o arrástralas hasta otra
+          carpeta o hasta un tramo de la ruta, y se llevan dentro todo lo que guardan.
+          Ni al moverlas ni al cambiarles el nombre se pierde nada: los libros de
+          dentro conservan su página, sus marcadores, sus anotaciones y su nota, y lo
+          mismo las subcarpetas.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Descargar una carpeta entera</summary>
+<p>
+          el menú «⋯» de cada carpeta la guarda completa, con sus subcarpetas y todos
+          sus libros. En Chrome, Edge y Opera de escritorio eliges dónde ponerla y se
+          copia tal cual; en los demás navegadores (Firefox, Safari, móviles) se
+          descarga como un único archivo ZIP.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Retroceder</summary>
+<p>
+          el botón (o el gesto) de volver atrás del navegador sube un nivel de carpeta
+          en lugar de salir de EduReader: desde una subcarpeta lleva a la anterior y
+          desde la raíz sí sale. También cierra el lector, la ayuda o los ajustes.</p>
+</details>
+</div>
+</div>
+<div class="tarjeta">
+<h2>Mover, guardar y borrar</h2>
+<div class="puntos-ayuda">
+<details class="punto-ayuda">
+<summary>Subir a la nube</summary>
+<p>
+          con una nube configurada, el botón de la nube de cada libro local lo copia a
+          tu carpeta remota conservando la página por la que vas; también puedes subir
+          un archivo con el «+» o arrastrarlo a la sección «En la nube»; también puedes
+          arrastrar un libro de «En este dispositivo» hasta la nube o hasta una de sus
+          carpetas. Todo se sube a la carpeta que tengas abierta.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Llevar libros de un lado a otro</summary>
+<p>
+          un libro de la nube se puede guardar en el dispositivo con «Guardar en este
+          dispositivo» o arrastrándolo hasta la sección (o la carpeta) local; y uno del
+          dispositivo se sube a la nube con su botón o arrastrándolo hasta «En la
+          nube». En ambos casos se hace una copia: el original se queda donde estaba y
+          cada biblioteca lleva su propio progreso.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Disponible sin conexión</summary>
+<p>
+          el botón de la nube con flecha guarda una copia gestionada del libro remoto.
+          Si la red falla, EduReader la muestra y la abre automáticamente. El botón
+          verde permite quitar solo esa copia sin borrar el libro de la nube.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Descargar</summary>
+<p>
+          el botón de descarga guarda una copia del archivo (PDF o EPUB) en el
+          dispositivo, venga de la nube o de la biblioteca local.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Borrar</summary>
+<p>
+          la papelera de cada libro lo elimina (del servidor si es de la nube, o de
+          este dispositivo si es local).</p>
+</details>
+<details class="punto-ayuda">
+<summary>Estadísticas de lectura</summary>
+<p>El botón del gráfico de la cabecera abre el tiempo que dedicas a
+          leer: el total, el de hoy y el de la semana, los días seguidos que
+          llevas, un gráfico de barras y los
+          libros a los que más rato les echas —los de menos de cinco minutos no salen
+          en esa lista, para que no la llenen los que solo abriste para ver de qué
+          iban; su tiempo sigue contando en los totales y en la ficha del libro—. Esa
+          lista se puede ordenar por tiempo dedicado, por última lectura o por título,
+          y cada libro abre su ficha. El gráfico se agrupa por
+          <strong>días, semanas, meses o años</strong>, y debajo compara el tramo en
+          curso con el anterior: cuánto llevas este mes frente al pasado, o este año
+          frente al otro. La barra rayada es la del tramo que aún va a medias. El
+          detalle por días llega hasta unos trece meses atrás; el total de cada mes
+          se guarda para siempre, así que los meses y los años se pueden comparar
+          aunque sean viejos. Solo se cuenta el tiempo con el
+          libro delante: mientras la aplicación no está a la vista —otra pestaña, otra
+          aplicación, el móvil bloqueado— el reloj se para, así que dejarla abierta no
+          suma. De cada página se cuentan como mucho cinco minutos; si te quedas más
+          rato en la misma, la barra del pie avisa con un «En pausa» y el reloj vuelve a
+          correr en cuanto pasas de página.</p>
+<p>Si prefieres que no se mida nada, hay una casilla —«No medir el tiempo
+          de lectura»— en <em>⚙️ Ajustes → Datos</em> y al pie de la propia pantalla de
+          estadísticas. Al marcarla se avisa de que se borrará lo apuntado hasta
+          entonces, porque dejar las cifras viejas a la vista de quien acaba de pedir
+          que no se le mida sería lo contrario de lo que ha pedido. Se puede volver a
+          activar cuando quieras: entonces se empieza a contar desde cero. La decisión
+          viaja con el resto de tus datos: si usas la nube, tus otros dispositivos
+          dejan de medir en cuanto sincronizan.</p>
+<p>Con una nube configurada, las cifras suman todos tus
+          dispositivos: el tiempo de cada libro lleva debajo el reparto («este
+          dispositivo 2 h · Chrome en Linux 45 min»), de modo que sabes cuánto
+          te ha costado leerlo aunque lo hayas leído a ratos en cada aparato, y
+          un día en el que hayas leído en dos cuenta como un solo día de la
+          racha. Todo ello viaja con el progreso de lectura, en tu propio
+          servidor, y no se envía a ningún otro sitio. Puedes borrarlas cuando
+          quieras desde esa misma pantalla —se borran en todos los
+          dispositivos— sin tocar tus libros ni tu progreso.</p>
+<p>De un libro suelto lo tienes más a mano: mientras lo lees, la
+          barra del pie empieza por el tiempo que llevas dedicado, y al pulsarlo
+          se abre su ficha, con lo leído, las páginas, el ritmo, lo que falta y
+          el reparto por dispositivos. La misma ficha está en el menú «⋯» del
+          libro en la biblioteca.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Importar y exportar</summary>
+<p>
+          el botón de la carpeta con flecha de la cabecera abre una pantalla desde la
+          que puedes añadir libros y descargar o restaurar copias ZIP. Hay una copia
+          para los libros de «En este dispositivo» y otra para toda la biblioteca
+          WebDAV, incluidas sus subcarpetas. Ambas conservan el progreso, los
+          marcadores y las anotaciones; ninguna contiene la contraseña. Para guardar
+          aparte la URL, el usuario y la contraseña de aplicación, usa
+          <em>Configuración → Llevar la configuración a otro dispositivo</em>.</p>
+</details>
+</div>
+</div>
+</div>
+<div aria-label="Lector" class="panel-pestana" hidden="" id="panel-ayuda-lector" role="tabpanel" tabindex="0">
+<div class="tarjeta">
+<h2>Ver la página</h2>
+<div class="puntos-ayuda">
+<details class="punto-ayuda">
+<summary>Modo de lectura</summary>
+<p>
+          página a página (como un libro) o páginas continuas con scroll vertical.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Pasar página</summary>
+<p>
+          arrastra hacia los lados y la página acompaña al dedo dejando ver adónde vas;
+          si te arrepientes a medio camino, vuelve sola a su sitio. Pulsando los
+          márgenes izquierdo y derecho, o con las flechas y el espacio, la página hace
+          sola ese mismo recorrido, así que también se ve en el ordenador. En los PDF
+          se ve de verdad la página vecina. También vale por arriba y por abajo:
+          pulsar la parte baja o deslizar el dedo hacia arriba adelanta, y la parte
+          alta o el dedo hacia abajo retrocede. Con las páginas continuas, o con
+          zoom, manda el desplazamiento y no hay animación.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Columnas de texto</summary>
+<p>
+          el botón de las columnas abre un menú: automáticas, o de una a cuatro. En automático caben las que quepan sin que las líneas se hagan incómodas de leer, y se rehacen solas al girar el aparato o al cambiar el tamaño de la letra. Lo que elijas es de ese libro y de este dispositivo. En los PDF, que llegan maquetados, solo se puede ver una página o dos juntas. Cuándo aparecen en automático lo decides en <em>⚙️ Ajustes → Lector</em>, diciendo de cuántas letras quieres las líneas.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Girar la página (solo PDF)</summary>
+<p>
+          el botón de girar rota el documento 90° cada vez, útil para escaneos torcidos
+          o apaisados. El giro se recuerda para cada libro en este dispositivo.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Pantalla completa</summary>
+<p>
+          un toque en el centro de la página oculta la barra superior para leer sin
+          distracciones; otro toque la recupera.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Ajuste y zoom</summary>
+<p>
+          los tres mandos del zoom van juntos: las dos lupas, que amplían y reducen, y
+          en medio el aumento en tanto por ciento. Al pulsar ese número se abre un
+          panel con «Ajustar al ancho», «Ajustar la página completa», los aumentos más
+          usados y un hueco donde escribir el que quieras (205 %, si es lo que te
+          conviene). En PDF el porcentaje es el de la página —100 % es su tamaño
+          natural, así que ajustarla al ancho puede dar cualquier cifra— y en EPUB es
+          el de la letra. Con zoom puedes arrastrar la página con el ratón o el dedo, y
+          en pantalla táctil pellizcar para ampliar: en los PDF cambia el zoom y en los
+          EPUB, el tamaño de la letra.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Tiempo restante</summary>
+<p>
+          tras unos minutos de lectura aparece una estimación del tiempo que falta para
+          terminar el libro, calculada con tu ritmo real en este dispositivo.</p>
+</details>
+</div>
+</div>
+<div class="tarjeta">
+<h2>Texto y color</h2>
+<div class="puntos-ayuda">
+<details class="punto-ayuda">
+<summary>Ajustes de texto (solo EPUB)</summary>
+<p>
+          el botón de la letra permite elegir el tipo de letra (la del libro, con
+          serifa o sin serifa), la alineación, el interlineado, el margen de ambos
+          lados y si se parten las palabras al final de línea. Los mismos ajustes están
+          en <em>⚙️ Ajustes → Lector</em>, para verlos y cambiarlos sin abrir un libro;
+          los dos sitios enseñan siempre lo mismo. Partirlas viene puesto: en pantalla
+          estrecha, y más con el texto justificado, es lo que evita los huecos grandes
+          entre palabras. Lo hace el navegador según el idioma del libro, así que puede
+          no estar disponible para todos los idiomas; también se puede dejar como venga
+          en cada libro, o no partir nunca.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Papel del libro</summary>
+<p>
+          el papel es el tema de la aplicación: no hay dos ajustes que cuadrar. El
+          botón del tema, en la cabecera de la biblioteca, abre un menú con cinco
+          opciones —el del sistema, claro, sepia (tostado, más descansado para ratos
+          largos), oscuro y negro (negro puro, para pantallas OLED)— y cambia a la
+          vez la página del libro y todo lo demás. En EPUB se
+          cambian los colores del texto, así que las ilustraciones se ven tal cual; en
+          PDF, que es una imagen ya dibujada, se tiñe la página entera.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Imágenes con los temas oscuros (solo PDF)</summary>
+<p>
+          al invertir la página, las fotos y los logotipos quedan en negativo. El botón
+          de la imagen, que aparece en la barra del lector cuando lees un PDF con el
+          tema oscuro o el negro, les devuelve su color. Se recuerda de un libro a otro. Las páginas
+          escaneadas no se tocan: ahí la hoja entera es una imagen y devolverle su
+          color dejaría el papel en blanco, que es justo lo que se quiere evitar de
+          noche.</p>
+</details>
+</div>
+</div>
+<div class="tarjeta">
+<h2>Moverse por el libro</h2>
+<div class="puntos-ayuda">
+<details class="punto-ayuda">
+<summary>Ir a un punto</summary>
+<p>
+          toca el indicador de página (o porcentaje en EPUB) para saltar directamente.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Índice y miniaturas</summary>
+<p>
+          el botón del panel abre lo que traiga el libro, y su texto lo dice: el
+          índice, las miniaturas de las páginas o ambos. Al abrirlo, el capítulo por el
+          que vas aparece resaltado y a la vista, sin buscarlo. En pantalla ancha la
+          barra lateral se queda abierta de un libro a otro hasta que la cierres tú.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Marcadores</summary>
+<p>
+          el botón del marcador guarda la posición actual para volver a ella cuando
+          quieras. Puedes asignarle un nombre y cambiarlo más tarde. En los libros de
+          la nube, los marcadores se sincronizan entre dispositivos junto con la
+          posición de lectura.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Volver tras un salto</summary>
+<p>
+          después de usar el índice, la búsqueda o el selector de posición aparecen
+          botones para volver atrás o avanzar de nuevo. En móvil quedan integrados a
+          ambos lados del indicador de página o porcentaje.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Buscar dentro del libro</summary>
+<p>
+          la lupa encuentra palabras o frases, lleva al punto exacto del resultado y lo
+          deja resaltado unos segundos para localizarlo de un vistazo.</p>
+</details>
+</div>
+</div>
+<div class="tarjeta">
+<h2>Anotar y escuchar</h2>
+<div class="puntos-ayuda">
+<details class="punto-ayuda">
+<summary>Resaltados y notas</summary>
+<p>
+          selecciona texto del PDF o EPUB y elige un color de resaltado (amarillo,
+          verde, azul o rosa) o añade una nota. El color se puede cambiar después al
+          editar la anotación. El botón del rotulador muestra todas las anotaciones del
+          libro. En los libros de la nube se sincronizan también cuando trabajas sin
+          conexión.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Exportar anotaciones</summary>
+<p>
+          el botón de descarga del panel de anotaciones guarda todos los resaltados y
+          notas del libro en un archivo Markdown (.md), con su página o posición, listo
+          para tus apuntes o aplicaciones como Obsidian.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Lectura en voz alta</summary>
+<p>
+          el botón del altavoz lee el libro con la voz del navegador, empezando en la
+          página actual. La frase que suena se va resaltando para poder seguirla con la
+          vista, y la página avanza sola cuando la voz llega al final de lo que se ve,
+          así que también puedes leer mirando. En los EPUB, si una frase empieza en una
+          página y termina en la siguiente, la página cambia a mitad de la frase, más o
+          menos por donde va la voz, para no dejarte mirando un trozo mientras suena el
+          resto. El panel se retira al empezar para no
+          tapar el texto: mientras suena, un control pequeño abajo permite pausar,
+          continuar y detener, y en pantalla ancha el propio altavoz pausa y reanuda.
+          Al continuar, la frase que se cortó se repite entera. Los ajustes (voz y
+          velocidad) vuelven a abrirse desde el menú «⋯». Pasar de página a mano
+          detiene la lectura. En los PDF escaneados sin texto no funciona.</p>
+</details>
+</div>
+</div>
+<div class="tarjeta">
+<h2>Imprimir y guardar en PDF</h2>
+<div class="puntos-ayuda">
+<details class="punto-ayuda">
+<summary>Llevar un EPUB al papel</summary>
+<p>
+          el botón de la impresora (o «Imprimir o guardar en PDF» en el menú «⋯»)
+          compone el libro para hojas de papel y abre el diálogo de impresión del
+          navegador, donde puedes elegir la impresora o «Guardar como PDF». Se elige el
+          tamaño de la hoja (A4 o Carta), los márgenes y el cuerpo de letra; cada
+          capítulo empieza en hoja nueva y el libro conserva su maquetación y sus
+          ilustraciones. Las tres medidas admiten además un número exacto: eligiendo «Personalizado» se escriben los milímetros de la hoja y del margen, y los puntos de la letra. Los ajustes se recuerdan para la próxima vez. En los PDF no
+          aparece: esos se imprimen descargándolos.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Imprimir solo un capítulo</summary>
+<p>
+          la lista del diálogo trae todos los capítulos marcados. Desmarca los que no
+          quieras —o pulsa «Ninguno» y elige solo uno— y el papel llevará únicamente
+          esos. Un libro entero en A4 son muchas hojas. La hoja de título con el nombre del libro y el autor también se puede quitar, con su casilla.</p>
+</details>
+<details class="punto-ayuda">
+<summary>Subrayados y notas en el papel</summary>
+<p>
+          si el libro tiene anotaciones, una casilla permite llevarlas: los pasajes
+          salen con su color y cada nota, con su llamada, se recoge al final de su
+          capítulo junto al fragmento que comenta. Desmarcada, se imprime el texto
+          limpio.</p>
+</details>
+</div>
+</div>
+<div class="tarjeta">
+<h2>Sobre los PDF</h2>
+<div class="puntos-ayuda">
+<details class="punto-ayuda">
+<summary>Texto y enlaces del PDF</summary>
+<p>
+          puedes seleccionar y copiar texto, y los enlaces del propio PDF funcionan:
+          los internos (índice, referencias) saltan a su página y los externos se abren
+          en otra pestaña.</p>
+</details>
+<details class="punto-ayuda">
+<summary>PDF protegidos</summary>
+<p>
+          si un PDF está cifrado, EduReader solicita su contraseña para abrirlo. La
+          contraseña no se guarda.</p>
+</details>
+</div>
+</div>
+</div>
+<div aria-label="Nube" class="panel-pestana" hidden="" id="panel-ayuda-nube" role="tabpanel" tabindex="0">
+<div class="tarjeta">
+<h2>¿Qué es WebDAV?</h2>
+<p>Es una forma estándar de acceder por internet a los archivos
+        guardados en un servidor, como si fuese una carpeta remota. EduReader
+        lo usa para leer tus libros y para guardar tu posición de lectura en tu
+        propia nube, de modo que puedas continuar desde otro dispositivo.</p>
+</div>
+<div class="tarjeta importante">
+<h2>⚠️ Importante: no vale cualquier nube</h2>
+<p>El lector funciona dentro del navegador y, por seguridad, el
+        navegador solo permite conectar con un servidor si ese servidor lo
+        autoriza de forma expresa (una regla técnica llamada <em>CORS</em>).
+        Esto deja fuera a casi todos los servicios comerciales:</p>
+<ul class="lista-ayuda">
+<li><strong>Google Drive, Dropbox, OneDrive:</strong> no sirven; no
+          ofrecen un WebDAV utilizable de esta forma.</li>
+<li><strong>Koofr, pCloud, Yandex y similares:</strong> tienen
+          WebDAV, pero bloquean el acceso desde páginas web, y no puedes
+          cambiarlo porque el servidor no es tuyo.</li>
+<li><strong>Nextcloud u ownCloud con el permiso activado:</strong>
+          esta es, en la práctica, la única opción que funciona para
+          sincronizar.</li>
+</ul>
+</div>
+<details class="tarjeta tarjeta-plegable">
+<summary>No tengo servidor propio (lo más habitual)</summary>
+<p>Casi nadie tiene su propio servidor, y no pasa nada. Tienes dos
+        caminos:</p>
+<ul class="lista-ayuda">
+<li><strong>Que alguien te dé acceso a su Nextcloud</strong> (un
+          familiar, tu centro de estudios, tu equipo de trabajo…). Pídele tres
+          datos: la <em>URL de tu carpeta WebDAV</em>, tu <em>usuario</em> y
+          una <em>contraseña de aplicación</em>. Con eso ya sincronizas entre
+          dispositivos, sin montar nada tú.</li>
+<li><strong>Que nadie te dé acceso:</strong> añade tus libros con el
+          «+» de «En este dispositivo». Se lee igual de bien; solo pierdes la
+          sincronización automática entre aparatos.</li>
+</ul>
+</details>
+<details class="tarjeta tarjeta-plegable">
+<summary>Tengo o administro un Nextcloud / ownCloud</summary>
+<p>Para permitir que EduReader se conecte:</p>
+<ul class="lista-ayuda">
+<li>Instala la app <strong>WebAppPassword</strong> y añade el dominio
+          de este lector (<code id="ayuda-dominio">este sitio</code>) a los
+          orígenes permitidos.</li>
+<li>Crea una <strong>contraseña de aplicación</strong> (Ajustes →
+          Seguridad). No uses tu contraseña principal.</li>
+<li>En <strong>⚙️ Ajustes</strong> de este lector, pon la URL de tu
+          carpeta (por ejemplo
+          <code>https://tu-nube.com/remote.php/dav/files/USUARIO/Libros</code>),
+          tu usuario y esa contraseña.</li>
+</ul>
+</details>
+<details class="tarjeta tarjeta-plegable">
+<summary>Llevar la configuración a otro dispositivo</summary>
+<p>Una vez configurada tu nube, en <strong>⚙️ Ajustes → «Copiar enlace
+        de configuración»</strong> obtienes un enlace que lo lleva todo (URL,
+        usuario y contraseña). Ábrelo en otro dispositivo y quedará
+        configurado al instante. Compártelo solo por canales privados y
+        bórralo después de usarlo.</p>
+</details>
+<details class="tarjeta tarjeta-plegable destacado">
+<summary>🤖 ¿Dudas al configurar? Pregunta a una IA</summary>
+<p>Configurar un servidor tiene su miga, pero una inteligencia
+        artificial (ChatGPT, Claude, Gemini…) te guía paso a paso. Copia y
+        pega preguntas como estas:</p>
+<ul class="lista-ayuda">
+<li>«Tengo un servidor Nextcloud. ¿Cómo instalo la app
+          <em>WebAppPassword</em> y permito el acceso WebDAV desde una web
+          alojada en <code id="ayuda-dominio-ia">este sitio</code>?»</li>
+<li>«¿Cómo creo una contraseña de aplicación en Nextcloud?»</li>
+<li>«¿El servicio de nube <em>[nombre]</em> permite acceso WebDAV
+          desde el navegador (CORS) para una web externa?»</li>
+</ul>
+</details>
+</div>
+<div aria-label="Privacidad" class="panel-pestana" hidden="" id="panel-ayuda-privacidad" role="tabpanel" tabindex="0">
+<div class="tarjeta">
+<h2>Privacidad</h2>
+<p>No hay ningún servidor intermedio. Tu navegador se conecta
+        directamente con tu nube, y la URL, el usuario y la contraseña se
+        guardan únicamente en este navegador.</p>
+</div>
+</div>
+</main>
+</section>
+<!-- Diálogo para mover un libro de la nube a otra carpeta -->
+<!-- Imprimir el EPUB (o guardarlo en PDF, que es lo mismo desde el diálogo
+       del navegador). Se elige el papel y qué capítulos van; el documento se
+       compone aparte, en un marco oculto. -->
+<div class="dialogo-fondo oculto" id="dialogo-imprimir">
+<div aria-labelledby="titulo-imprimir" aria-modal="true" class="dialogo dialogo-imprimir" role="dialog">
+<h2 data-i18n="printBook" id="titulo-imprimir">Imprimir ou guardar em PDF</h2>
+<p class="ayuda" data-i18n="printHelp">Abrir-se-á a caixa de impressão do navegador, onde podes escolher a impressora ou «Guardar como PDF».</p>
+<!-- Cada medida tiene sus opciones de siempre y, eligiendo
+           «Personalizado», el número exacto debajo. -->
+<div class="opciones-impresion">
+<div class="opcion-impresion">
+<label data-i18n="printPaper" for="impresion-tamano">Papel</label>
+<select id="impresion-tamano">
+<option value="a4">A4</option>
+<option data-i18n="printPaperLetter" value="carta">Carta</option>
+<option data-i18n="printCustom" value="personalizado">Personalizado</option>
+</select>
+<span class="medida-personal oculto" id="medida-papel">
+<input aria-label="Largura em milímetros" data-i18n-aria-label="printCustomWidth" id="impresion-ancho" inputmode="decimal" max="500" min="50" step="1" type="number"/>
+<span aria-hidden="true">×</span>
+<input aria-label="Altura em milímetros" data-i18n-aria-label="printCustomHeight" id="impresion-alto" inputmode="decimal" max="500" min="50" step="1" type="number"/>
+<span aria-hidden="true" class="unidad">mm</span>
+</span>
+</div>
+<div class="opcion-impresion">
+<label data-i18n="printMargins" for="impresion-margen">Margens</label>
+<select id="impresion-margen">
+<option data-i18n="printMarginNarrow" value="estrecho">Estreitas</option>
+<option data-i18n="printMarginNormal" value="normal">Normais</option>
+<option data-i18n="printMarginWide" value="ancho">Largas</option>
+<option data-i18n="printCustom" value="personalizado">Personalizado</option>
+</select>
+<span class="medida-personal oculto" id="medida-margen">
+<input aria-label="Margem em milímetros" data-i18n-aria-label="printCustomMargin" id="impresion-margen-mm" inputmode="decimal" max="60" min="0" step="1" type="number"/>
+<span aria-hidden="true" class="unidad">mm</span>
+</span>
+</div>
+<div class="opcion-impresion">
+<label data-i18n="printFont" for="impresion-letra">Letra</label>
+<select id="impresion-letra">
+<option data-i18n="printFontSmall" value="pequena">Pequena</option>
+<option data-i18n="printFontNormal" value="normal">Normal</option>
+<option data-i18n="printFontLarge" value="grande">Grande</option>
+<option data-i18n="printCustom" value="personalizado">Personalizado</option>
+</select>
+<span class="medida-personal oculto" id="medida-letra">
+<input aria-label="Corpo de letra em pontos" data-i18n-aria-label="printCustomFont" id="impresion-letra-pt" inputmode="decimal" max="30" min="5" step="0.5" type="number"/>
+<span aria-hidden="true" class="unidad">pt</span>
+</span>
+</div>
+</div>
+<label class="casilla">
+<input id="impresion-portada" type="checkbox"/>
+<span data-i18n="printTitlePage">Começar com uma folha de título</span>
+</label>
+<label class="casilla">
+<input id="impresion-anotaciones" type="checkbox"/>
+<span data-i18n="printAnnotations">Incluir os sublinhados e as notas</span>
+</label>
+<div class="capitulos-impresion">
+<div class="cabecera-capitulos-impresion">
+<span id="resumen-impresion" role="status"></span>
+<span>
+<button class="btn-enlace" data-i18n="selectAll" id="impresion-todos" type="button">Todos</button>
+<button class="btn-enlace" data-i18n="selectNone" id="impresion-ninguno" type="button">Nenhum</button>
+</span>
+</div>
+<ul class="lista-capitulos-impresion" id="lista-capitulos-impresion"></ul>
+</div>
+<div class="estado" id="estado-imprimir" role="status"></div>
+<div class="fila-botones">
+<button class="btn-secundario" data-i18n="cancel" id="btn-cancelar-imprimir" type="button">Cancelar</button>
+<button class="btn-primario" data-i18n="print" id="btn-confirmar-imprimir" type="button">Imprimir</button>
+</div>
+</div>
+</div>
+<!-- Donde se compone el documento que se imprime. Fuera de la vista: lo que
+       se ve es el diálogo del navegador, no esto. -->
+<iframe aria-hidden="true" class="marco-impresion" id="marco-impresion" tabindex="-1"></iframe>
+<div class="dialogo-fondo oculto" id="dialogo-mover">
+<div aria-labelledby="titulo-mover" aria-modal="true" class="dialogo" role="dialog">
+<h2 id="titulo-mover"></h2>
+<nav aria-label="Carpeta de destino" class="ruta-carpeta" data-i18n-aria-label="targetFolder" id="ruta-mover"></nav>
+<ul class="lista-carpetas-mover" id="lista-carpetas-mover"></ul>
+<div class="estado" id="estado-mover" role="status"></div>
+<div class="fila-botones botones-mover">
+<button class="btn-secundario" data-i18n="newFolder" id="btn-carpeta-nueva-mover" type="button">Criar uma pasta</button>
+<button class="btn-secundario" data-i18n="cancel" id="btn-cancelar-mover" type="button">Cancelar</button>
+<button class="btn-primario" data-i18n="moveHere" id="btn-confirmar-mover" type="button">Mover aquí</button>
+</div>
+</div>
+</div>
+<!-- Nota sobre el libro entero, escrita y leída desde la biblioteca. Es cosa
+       distinta de las anotaciones, que van pegadas a un fragmento del texto. -->
+<div class="dialogo-fondo oculto" id="dialogo-registro">
+<div aria-labelledby="titulo-dialogo-registro" aria-modal="true" class="dialogo dialogo-registro" role="dialog">
+<h2 data-i18n="activityLog" id="titulo-dialogo-registro">Registo de atividade</h2>
+<ol class="lista-registro" id="lista-registro"></ol>
+<p class="ayuda oculto" data-i18n="logEmpty" id="registro-vacio">Ainda não há nada registado.</p>
+<div class="fila-botones botones-registro">
+<button class="btn-secundario btn-peligro-suave" data-i18n="clearLog" id="btn-borrar-registro" type="button">Vaciar</button>
+<button class="btn-secundario" data-i18n="copyLog" id="btn-copiar-registro" type="button">Copiar</button>
+<button class="btn-secundario" data-i18n="downloadLog" id="btn-descargar-registro" type="button">Guardar</button>
+<button class="btn-primario" data-i18n="close" id="btn-cerrar-registro" type="button">Cerrar</button>
+</div>
+</div>
+</div>
+<div class="dialogo-fondo oculto" id="dialogo-nota-libro">
+<form aria-labelledby="titulo-nota-libro" aria-modal="true" class="dialogo" id="form-nota-libro" role="dialog">
+<h2 data-i18n="bookNote" id="titulo-nota-libro">Nota del libro</h2>
+<p class="libro-de-la-nota" id="libro-de-la-nota"></p>
+<div class="fila-calificacion" id="calificacion-nota-libro">
+<span data-i18n="rating" id="etiqueta-calificacion">Classificação</span>
+<span aria-labelledby="etiqueta-calificacion" class="estrellas editable" id="estrellas-nota-libro" role="group"></span>
+</div>
+<label class="sr-solo" data-i18n="bookNoteLabel" for="texto-nota-libro">Tu nota sobre este libro</label>
+<textarea class="texto-nota-libro" data-i18n-placeholder="bookNotePlaceholder" id="texto-nota-libro" placeholder="De qué va, por dónde lo dejaste, qué quieres recordar…" rows="8"></textarea>
+<div class="fila-botones botones-nota-libro">
+<button class="btn-secundario btn-peligro-suave" data-i18n="actionDelete" id="btn-borrar-nota-libro" type="button">Borrar</button>
+<button class="btn-secundario" data-i18n="cancel" id="btn-cancelar-nota-libro" type="button">Cancelar</button>
+<button class="btn-primario" data-i18n="save" type="submit">Guardar</button>
+</div>
+</form>
+</div>
+<div class="dialogo-fondo oculto" id="dialogo-editar-nota">
+<form aria-labelledby="titulo-editar-nota" aria-modal="true" class="dialogo dialogo-editar-nota" id="form-editar-nota" role="dialog">
+<h2 data-i18n="editNote" id="titulo-editar-nota">Editar nota</h2>
+<p class="fragmento-editar-nota" id="fragmento-editar-nota"></p>
+<div aria-label="Cor do realce" class="colores-seleccion colores-editar" data-i18n-aria-label="highlightColor" id="colores-editar-nota" role="group">
+<button aria-pressed="false" class="punto-color" data-color="amarillo" data-i18n-title="highlightYellow" title="Resaltar en amarillo" type="button"></button>
+<button aria-pressed="false" class="punto-color" data-color="verde" data-i18n-title="highlightGreen" title="Realçar a verde" type="button"></button>
+<button aria-pressed="false" class="punto-color" data-color="azul" data-i18n-title="highlightBlue" title="Resaltar en azul" type="button"></button>
+<button aria-pressed="false" class="punto-color" data-color="rosa" data-i18n-title="highlightPink" title="Resaltar en rosa" type="button"></button>
+</div>
+<textarea aria-label="Nota" data-i18n-aria-label="note" id="texto-editar-nota" maxlength="4000" rows="7"></textarea>
+<div class="fila-botones botones-editar-nota">
+<button class="btn-secundario" data-i18n="cancel" id="btn-cancelar-editar-nota" type="button">Cancelar</button>
+<button class="btn-primario" data-i18n="save" type="submit">Guardar</button>
+</div>
+</form>
+</div>
+<div class="dialogo-fondo oculto" id="dialogo-contrasena-pdf">
+<form aria-labelledby="titulo-contrasena-pdf" aria-modal="true" class="dialogo dialogo-contrasena-pdf" id="form-contrasena-pdf" role="dialog">
+<h2 data-i18n="pdfPasswordTitle" id="titulo-contrasena-pdf">PDF protegido</h2>
+<p data-i18n="pdfPasswordHelp">Introduce la contraseña para abrir este PDF. No se guardará.</p>
+<p class="estado error oculto" data-i18n="pdfPasswordIncorrect" id="error-contrasena-pdf">La contraseña no es correcta.</p>
+<label><span data-i18n="pdfPassword">Palavra-passe do PDF</span>
+<input autocomplete="off" id="campo-contrasena-pdf" required="" type="password"/>
+</label>
+<div class="fila-botones botones-dialogo">
+<button class="btn-secundario" data-i18n="cancel" id="btn-cancelar-contrasena-pdf" type="button">Cancelar</button>
+<button class="btn-primario" data-i18n="open" type="submit">Abrir</button>
+</div>
+</form>
+</div>
+<div class="dialogo-fondo oculto" id="dialogo-pdf-sin-texto">
+<div aria-labelledby="titulo-pdf-sin-texto" aria-modal="true" class="dialogo dialogo-pdf-sin-texto" role="dialog">
+<h2 data-i18n="pdfNoTextTitle" id="titulo-pdf-sin-texto">PDF sem texto selecionável</h2>
+<p data-i18n="pdfNoTextHelp">Este documento parece estar digitalizado. A pesquisa, a seleção e a leitura em voz alta não funcionarão corretamente.</p>
+<ol class="pasos-ocr">
+<li data-i18n="pdfNoTextStep1">Transfira o PDF a partir do menu do livro.</li>
+<li data-i18n="pdfNoTextStep2">Abra-o no Scribe OCR e gere uma cópia PDF com texto.</li>
+<li data-i18n="pdfNoTextStep3">Transfira essa cópia e volte a enviá-la para o EduReader.</li>
+</ol>
+<p class="ayuda" data-i18n="pdfNoTextPrivacy">O EduReader não enviará o documento: terá de o selecionar você mesmo na ferramenta externa.</p>
+<div class="fila-botones botones-dialogo">
+<button class="btn-secundario" data-i18n="understood" id="btn-cerrar-pdf-sin-texto" type="button">Entendido</button>
+<a class="btn-primario" data-i18n="openScribeOcr" href="https://scribeocr.com/" id="enlace-scribe-ocr" rel="noopener" target="_blank">Abrir o Scribe OCR</a>
+</div>
+</div>
+</div>
+<!-- Ilustración del libro abierta a pantalla completa. En EPUB, subir el
+       tamaño de la letra no agranda las imágenes: para verlas de cerca se
+       pulsan. Se cierra tocando en cualquier parte. -->
+<div aria-label="Imagen ampliada" aria-modal="true" class="dialogo-fondo visor-imagen oculto" data-i18n-aria-label="zoomedImage" id="visor-imagen" role="dialog">
+<img alt="" id="imagen-ampliada"/>
+<button aria-label="Cerrar" class="btn-cerrar-imagen" data-i18n-aria-label="close" data-i18n-title="close" data-icono="x" id="btn-cerrar-imagen" title="Cerrar" type="button"></button>
+</div>
+<!-- Menú de acciones de un libro o una carpeta: se despliega junto al botón «⋯» -->
+<div class="fondo-menu-libro oculto" id="menu-libro">
+<div aria-labelledby="titulo-menu-libro" class="menu-libro" role="menu">
+<h2 id="titulo-menu-libro"></h2>
+<!-- La calificación, debajo del título: es lo primero que se busca de un
+           libro ya leído y aquí se cambia sin abrir el diálogo. -->
+<span class="estrellas oculto" id="calificacion-menu-libro"></span>
+<p class="oculto" id="resumen-menu-libro"></p>
+<!-- En pantalla táctil no hay «pasar el ratón»: este menú es donde se
+           lee la nota del libro sin abrir nada. -->
+<p class="nota-menu-libro oculto" id="nota-menu-libro"></p>
+<ul id="lista-menu-libro"></ul>
+</div>
+</div>
+<!-- Ficha de un libro: cuánto se ha tardado en leerlo. Vive a este nivel,
+       fuera de las vistas, porque se abre desde tres sitios: la barra del pie
+       del lector, el menú «⋯» de la biblioteca y la lista «En qué se va el
+       tiempo» de las estadísticas. -->
+<div class="fondo-ficha-libro oculto" id="ficha-libro">
+<div aria-labelledby="titulo-ficha-libro" aria-modal="true" class="ficha-libro" role="dialog">
+<div class="cabecera-panel-lector">
+<h2 id="titulo-ficha-libro" tabindex="-1"></h2>
+<button class="btn-icono" data-i18n-title="close" data-icono="x" id="cerrar-ficha-libro" title="Cerrar" type="button"></button>
+</div>
+<p class="ayuda oculto" data-i18n="statsBookEmpty" id="ficha-libro-vacia">Ainda não há tempo registado para este livro. Assim que ler uns minutos com ele aberto, aqui aparecerá quanto tempo lhe dedicou.</p>
+<ul class="cifras-estadisticas" id="cifras-ficha-libro"></ul>
+<div class="reparto-ficha oculto" id="reparto-ficha-libro">
+<h3 data-i18n="statsBookByDevice">Em cada dispositivo</h3>
+<ul class="lista-estadisticas-libros" id="lista-reparto-ficha"></ul>
+</div>
+<!-- Sacar el libro de «En qué se va el tiempo». No borra nada: vuelve
+           solo en cuanto se lea otro rato, y así lo dice el pie. -->
+<div class="ocultar-ficha oculto" id="ocultar-ficha-libro">
+<button class="btn-secundario" id="btn-ocultar-libro" type="button"></button>
+<p class="ayuda" id="pie-ocultar-libro"></p>
+</div>
+</div>
+</div>
+<!-- Cuando llega la posición de otro dispositivo y aquí ya se ha leído, no
+       se salta a ciegas: se enseña de qué punto se habla y se decide. -->
+<div class="aviso-posicion oculto" id="aviso-posicion-remota" role="alert">
+<p id="texto-posicion-remota"></p>
+<div class="acciones-aviso-posicion">
+<button class="btn-primario" data-i18n="remotePositionGo" id="btn-ir-posicion-remota" type="button">Ir para lá</button>
+<button class="btn-secundario" data-i18n="remotePositionStay" id="btn-quedarse-posicion" type="button">Ficar aqui</button>
+</div>
+</div>
+<div class="toast oculto" id="toast" role="status"></div>
+<div class="cargando oculto" id="cargando"><div class="ruedecilla"></div><span id="texto-cargando">Cargando…</span></div>
+<!-- El texto visible de arriba cambia con cada porcentaje; lo que se anuncia
+       es esta copia, que solo recibe el texto estable de cada operación. -->
+<span class="sr-solo" id="anuncio-cargando" role="status"></span>
+<script src="js/app.js" type="module"></script>
+<script defer="" src="js/analytics.js"></script>
+</body>
+</html>

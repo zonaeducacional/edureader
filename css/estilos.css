@@ -1,0 +1,2591 @@
+/* ── Temas ──
+   El claro son los valores de partida y el sepia y el oscuro los reemplazan.
+   El tema en uso lo marca un script del <head> con data-tema en <html>, así
+   que no hace falta duplicar la paleta en una consulta de medios:
+   «automático» se resuelve antes del primer pintado y no hay parpadeo al
+   cargar.
+   El tema es también el papel del libro: --papel es el fondo de la página en
+   EPUB y --filtro-pagina el tinte con que se pinta la del PDF, que al ser una
+   imagen ya dibujada no se puede recolorear de otro modo.
+   Todos los colores de texto llegan al menos a 4.5:1 sobre su fondo.
+   Las paletas no se atan a :root: cualquier elemento con data-tema se lleva
+   la suya, y de ahí viven las muestras de Ajustes, que enseñan cómo queda un
+   tema sin tener que ponérselo a la aplicación entera. */
+:root, [data-tema="claro"] {
+  color-scheme: light;
+  --fondo: #f8fafc;
+  --fondo-tarjeta: #ffffff;
+  --fondo-lector: #e2e8f0;
+  --texto: #0f172a;
+  --texto-suave: #475569;
+  --acento: #0369a1;
+  /* Fondo de los botones primarios y de las insignias, siempre con texto
+     blanco encima: el azul de antes (#0284c7) se quedaba en 4.1:1. */
+  --acento-oscuro: #0369a1;
+  --sobre-acento: #ffffff; /* texto sobre un fondo de acento pleno */
+  --peligro: #b91c1c;
+  --exito: #15803d;
+  --aviso: #a16207;
+  --formato-pdf: #be123c;
+  --formato-epub: #0f766e;
+  /* Los dos ámbitos de la biblioteca. El del dispositivo va en pizarra, no en
+     un color de aviso: guardar algo solo aquí es una elección, no un fallo. */
+  --ambito-nube: #0369a1;
+  --ambito-dispositivo: #64748b;
+  --borde: #cbd5e1;        /* separadores y marcos suaves */
+  /* Contorno de los campos: con el borde suave se pierden sobre la tarjeta.
+     Los dos temas llegan al 3:1 que pide un control (4,76:1 y 3,35:1). */
+  --borde-fuerte: #64748b;
+  --velo: rgba(15, 23, 42, 0.35);       /* fondo de los diálogos */
+  --velo-denso: rgba(248, 250, 252, 0.9); /* fondo del indicador de carga */
+  --sombra: rgba(15, 23, 42, 0.18);
+  --sombra-fuerte: rgba(15, 23, 42, 0.28);
+  --papel: #ffffff;
+  --filtro-pagina: none;
+}
+
+/* El tostado clásico de los lectores de tinta electrónica, llevado a toda la
+   aplicación: quien lee así un rato largo no quiere que la biblioteca le
+   devuelva un blanco de golpe al salir del libro. */
+[data-tema="sepia"] {
+  color-scheme: light;
+  --fondo: #efe4cf;
+  --fondo-tarjeta: #f8f1e0;
+  --fondo-lector: #e6dcc4;
+  --texto: #3b2f24;
+  --texto-suave: #6b5942;
+  --acento: #9a4a10;
+  --acento-oscuro: #8a4310;
+  --sobre-acento: #ffffff;
+  --peligro: #a3170f;
+  --exito: #146b32;
+  --aviso: #8a5a06;
+  --formato-pdf: #a8102f;
+  --formato-epub: #0d6157;
+  --ambito-nube: #0b5a86;
+  --ambito-dispositivo: #6b5942;
+  --borde: #d8c9ab;
+  --borde-fuerte: #8a7a5c;
+  --velo: rgba(59, 47, 36, 0.35);
+  --velo-denso: rgba(244, 236, 216, 0.9);
+  --sombra: rgba(59, 47, 36, 0.18);
+  --sombra-fuerte: rgba(59, 47, 36, 0.28);
+  --papel: #f4ecd8;
+  /* Suave a propósito: tiñe la hoja del PDF sin desvirtuar las ilustraciones
+     más de lo imprescindible. */
+  --filtro-pagina: sepia(0.55) saturate(0.85) brightness(0.97);
+}
+
+[data-tema="oscuro"] {
+  color-scheme: dark;
+  --fondo: #0f172a;
+  --fondo-tarjeta: #1e3a8a;
+  --fondo-lector: #0f172a;
+  --texto: #ffffff;
+  --texto-suave: #cbd5e1;
+  --acento: #fde047;
+  --acento-oscuro: #eab308;
+  --sobre-acento: #0f172a;
+  --peligro: #f87171;
+  --exito: #34d399;
+  --aviso: #fcd34d;
+  --formato-pdf: #fde047;
+  --formato-epub: #38bdf8;
+  --ambito-nube: #38bdf8;
+  --ambito-dispositivo: #cbd5e1;
+  --borde: rgba(255, 255, 255, 0.1);
+  --borde-fuerte: rgba(255, 255, 255, 0.2);
+  --velo: rgba(15, 23, 42, 0.75);
+  --velo-denso: rgba(15, 23, 42, 0.9);
+  --sombra: rgba(0, 0, 0, 0.5);
+  --sombra-fuerte: rgba(0, 0, 0, 0.7);
+  --papel: #0f172a;
+  --filtro-pagina: invert(0.93) hue-rotate(180deg);
+}
+
+/* El oscuro llevado al negro puro. En una pantalla OLED el píxel negro está
+   apagado: gasta menos y, a oscuras, no deja el halo que sí deja el azul del
+   tema oscuro. El texto no va en blanco puro a propósito —sobre negro
+   deslumbra y deja estela al desplazar—, sino en el gris claro de siempre,
+   que aun así queda en 12:1. */
+[data-tema="negro"] {
+  color-scheme: dark;
+  --fondo: #000000;
+  --fondo-tarjeta: #101014;
+  --fondo-lector: #000000;
+  --texto: #d6dbe3;
+  --texto-suave: #9ca6b4;
+  --acento: #38bdf8;
+  --acento-oscuro: #0369a1;
+  --sobre-acento: #082f49;
+  --peligro: #f87171;
+  --exito: #34d399;
+  --aviso: #fbbf24;
+  --formato-pdf: #fb7185;
+  --formato-epub: #2dd4bf;
+  --ambito-nube: #38bdf8;
+  --ambito-dispositivo: #9ca6b4;
+  --borde: #2b2f38;
+  --borde-fuerte: #6b7a90;
+  --velo: rgba(0, 0, 0, 0.75);
+  --velo-denso: rgba(0, 0, 0, 0.9);
+  --sombra: rgba(0, 0, 0, 0.6);
+  --sombra-fuerte: rgba(0, 0, 0, 0.7);
+  --papel: #000000;
+  /* Inversión completa, no la del 0,93 del oscuro: allí se deja un punto de
+     luz para que el papel case con el azul de la interfaz; aquí el papel es
+     negro, y cualquier resto de blanco se vería como una hoja gris flotando. */
+  --filtro-pagina: invert(1) hue-rotate(180deg);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; }
+
+/* Sin esto, en el móvil el dedo hacia abajo no retrocedía de página: lo cogía
+   antes el «tirar para recargar» de Chrome y la aplicación se recargaba
+   entera. El gesto no llega a tiempo de impedirlo, porque el navegador decide
+   de quién es el toque antes del primer movimiento que nosotros vemos.
+   «contain» y no «none»: el desplazamiento normal sigue igual, lo único que se
+   corta es que se propague al navegador.
+
+   Va aquí y en ningún sitio más. Ponerlo también dentro del iframe del EPUB
+   parecía prudente y no lo era: en modo continuo el capítulo se desplaza
+   propagando el movimiento del iframe al contenedor de epub.js, y cortarlo
+   ahí dejaba la rueda del ratón sin efecto. Desde el documento de arriba se
+   corta la propagación al navegador sin estorbar a la de dentro. */
+html, body { overscroll-behavior-y: contain; }
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+  line-height: 1.5;
+}
+
+.oculto { display: none !important; }
+
+/* Un único indicador de foco para todo lo que se puede tabular: el fondo tenue
+   que marca el paso del ratón no basta para saber dónde está el teclado. Las
+   reglas de más abajo pueden afinarlo, pero ninguna debe quitarlo. */
+:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+
+/* Las cabeceras y el contenido reciben el foco al cambiar de vista o al saltar
+   la barra: no son controles y no forman parte del recorrido del tabulador. */
+[data-foco-vista]:focus, [data-contenido-vista]:focus { outline: none; }
+
+/* Fuera de la vista hasta que se tabula hasta él. */
+.salto-contenido {
+  position: fixed; top: 0.5rem; left: 0.5rem; z-index: 100;
+  transform: translateY(-200%);
+  padding: 0.6rem 1.1rem; border: 1px solid var(--acento); border-radius: 0.5rem;
+  background: var(--fondo-tarjeta); color: var(--texto);
+  font: inherit; font-weight: 600; cursor: pointer;
+}
+.salto-contenido:focus { transform: translateY(0); }
+
+.vista { min-height: 100dvh; display: flex; flex-direction: column; }
+
+/* ── Cabeceras ── */
+.cabecera {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: max(0.75rem, env(safe-area-inset-top)) 1rem 0.75rem;
+  border-bottom: 1px solid var(--borde);
+}
+.cabecera h1 {
+  font-size: 1.2rem; flex: 1; min-width: 0;
+  display: flex; align-items: baseline; gap: 0.5rem;
+}
+.cabecera h1 .icono-app { align-self: center; }
+.subtitulo-app {
+  font-size: 0.8rem; font-weight: 400; color: var(--texto-suave);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  padding-left: 0.55rem; border-left: 1px solid var(--borde);
+}
+@media (max-width: 720px) {
+  .subtitulo-app { display: none; }
+}
+@media (max-width: 430px) {
+  .cabecera { gap: 0.25rem; padding-left: 0.5rem; padding-right: 0.5rem; }
+  .cabecera h1 { font-size: 1rem; }
+  /* El del tema va dentro de su control (lleva el menú colgando), así que no
+     lo alcanza el selector de hijo directo. */
+  .cabecera > .btn-icono,
+  .cabecera > .control-margenes > .btn-icono { padding-left: 0.35rem; padding-right: 0.35rem; }
+}
+
+/* ── Iconos SVG (Lucide) ── */
+.icono { width: 1.25rem; height: 1.25rem; display: block; flex: none; }
+.icono-app .icono { width: 1.4rem; height: 1.4rem; color: var(--acento); }
+.icono-seccion { display: inline-flex; margin-right: 0.45rem; vertical-align: -0.2rem; }
+.icono-seccion .icono { width: 1.05rem; height: 1.05rem; }
+.icono-app, .icono-seccion { flex: none; }
+
+.contenido {
+  width: 100%; max-width: 42rem; margin: 0 auto;
+  padding: 1rem; display: flex; flex-direction: column; gap: 1rem; flex: 1;
+}
+
+/* ── Pantallas anchas ──
+   Las 42rem son la medida de lectura cómoda y se quedan así en Ajustes y en la
+   Ayuda, que son texto seguido. La biblioteca es otra cosa: es un catálogo, y
+   en un monitor grande una única columna estrecha deja dos tercios de pantalla
+   en blanco y obliga a bajar mucho. Ahí se ensancha por tramos y las listas
+   pasan a varias columnas. El orden sigue siendo el del documento (izquierda a
+   derecha, fila a fila), así que el recorrido del tabulador no cambia. */
+#vista-biblioteca .contenido { max-width: var(--ancho-biblioteca, 42rem); }
+
+@media (min-width: 64rem)  { :root { --ancho-biblioteca: 56rem; } }
+@media (min-width: 80rem)  { :root { --ancho-biblioteca: 71rem; } }
+@media (min-width: 100rem) { :root { --ancho-biblioteca: 86rem; } }
+
+.fila-seccion { display: flex; align-items: flex-start; gap: 0.5rem; }
+/* La cabecera se queda arriba mientras se recorre su sección, para no perder
+   de vista si lo que se está mirando es la nube o el dispositivo. Solo donde
+   sobra alto: en un móvil, con su descripción de tres líneas, se comería
+   media pantalla, y allí ya distingue el origen la chapita de cada ficha. */
+@media (min-width: 48rem) {
+  .fila-seccion {
+    position: sticky; top: 0; z-index: 4;
+    background: var(--fondo-seccion, var(--fondo));
+    /* Se desborda hasta los lados de la sección para que lo que pasa por
+       debajo no asome por el hueco del acolchado. */
+    padding: 0.5rem 0.7rem; margin: -0.5rem -0.7rem 0;
+  }
+}
+.encabezado-seccion { flex: 1; min-width: 0; }
+.titulo-y-estado-seccion { display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap; }
+.fila-seccion h2 { font-size: 1rem; color: var(--texto); font-weight: 650; }
+.encabezado-seccion > p {
+  margin-top: 0.2rem; color: var(--texto-suave); font-size: 0.8rem; line-height: 1.35;
+}
+/* En un móvil esa descripción cae en tres líneas y hay que bajar media
+   pantalla para ver el primer libro; es texto de la primera visita, y a la
+   tercera ya no dice nada que no digan el título, la chapita y el color de la
+   sección. Se va de la vista, pero no del documento: quien navegue con un
+   lector de pantalla la sigue oyendo, que ahí no estorba. */
+@media (max-width: 47.99rem) {
+  .encabezado-seccion > p {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+  }
+}
+/* Secciones plegables: la cabecera alterna y el resto del contenido se
+   oculta, salvo cuando hay una búsqueda o un filtro activos. */
+.encabezado-seccion { cursor: pointer; }
+.btn-plegar-seccion .icono { transition: transform 0.15s; }
+.seccion-plegada .btn-plegar-seccion .icono { transform: rotate(-90deg); }
+/* Plegar y desplegar, con el contenido deslizándose en lugar de desaparecer
+   de golpe. La altura se anima con una rejilla de una fila que pasa de 1fr a
+   0fr: es la única forma de ir «hasta lo que mida el contenido» sin medirlo a
+   mano en JavaScript ni inventarse un máximo que descuadre el ritmo. */
+.cuerpo-plegable {
+  display: grid; grid-template-rows: 1fr;
+  transition: grid-template-rows 0.24s ease;
+}
+/* Sin display propio: los hijos siguen colocándose como antes de envolverlos. */
+.interior-plegable {
+  min-height: 0; overflow: hidden;
+  transition: opacity 0.18s ease, visibility 0s;
+}
+body:not(.filtrado-biblioteca) .seccion-plegada > .cuerpo-plegable,
+.continuar-plegado > .cuerpo-plegable {
+  grid-template-rows: 0fr;
+}
+/* Recortado no basta: a diferencia del «display: none» de antes, lo que queda
+   dentro seguiría cogiendo el tabulador y saliendo en un lector de pantalla.
+   La visibilidad se apaga al terminar de encoger, no antes, para que se vea
+   deslizarse. */
+body:not(.filtrado-biblioteca) .seccion-plegada > .cuerpo-plegable > .interior-plegable,
+.continuar-plegado > .cuerpo-plegable > .interior-plegable {
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.18s ease, visibility 0s linear 0.24s;
+}
+/* Quien pide menos animación no la recibe: el plegado sigue siendo instantáneo. */
+@media (prefers-reduced-motion: reduce) {
+  .cuerpo-plegable, .interior-plegable { transition: none; }
+}
+.estado-sincronizacion {
+  padding: 0.1rem 0.45rem; border: 1px solid; border-radius: 999px;
+  font-size: 0.65rem; font-weight: 750; line-height: 1.35;
+  letter-spacing: 0.025em; text-transform: uppercase; white-space: nowrap;
+}
+.estado-sincronizacion.error {
+  border-color: color-mix(in srgb, var(--peligro) 65%, transparent);
+  background: color-mix(in srgb, var(--peligro) 11%, transparent); color: var(--peligro);
+}
+.fila-seccion > .btn-icono { margin-top: -0.25rem; }
+/* En un móvil esos botones se llevaban el ancho de la fila y el título caía en
+   dos líneas a su lado. Bajan a una fila propia, pegados a la derecha, y el
+   título recupera la suya entera. */
+@media (max-width: 47.99rem) {
+  .fila-seccion { flex-wrap: wrap; }
+  .fila-seccion > .encabezado-seccion { flex: 1 0 100%; }
+  .fila-seccion > .btn-icono { margin-top: 0; }
+  /* Sea botón o etiqueta de subida, el primero tras el título empuja al resto
+     hacia la derecha. */
+  .fila-seccion > .encabezado-seccion + * { margin-left: auto; }
+}
+/* Cuántas carpetas y libros hay a la vista, junto al título: con la sección
+   plegada, o con un filtro puesto, es lo único que queda del contenido. */
+.conteo-seccion {
+  color: var(--texto-suave); font-size: 0.78rem; font-variant-numeric: tabular-nums;
+}
+.conteo-seccion:empty { display: none; }
+
+/* ── Los dos ámbitos: la nube y el dispositivo ──
+   Con el mismo fondo y el mismo marco, las dos bibliotecas solo se distinguían
+   por su cabecera, y en cuanto se baja un poco esta se pierde de vista. Cada
+   una tiene ahora su color, repetido en el icono del título, en un filete
+   lateral que recorre toda la sección y en la chapita de cada ficha. */
+#zona-remota { --ambito: var(--ambito-nube); }
+#zona-local  { --ambito: var(--ambito-dispositivo); }
+#zona-remota, #zona-local {
+  /* Opaco, y no un tinte transparente, porque la cabecera pegajosa se pinta
+     encima con este mismo color y las dos capas tienen que coincidir. */
+  --fondo-seccion: color-mix(in srgb, var(--ambito) 6%, var(--fondo));
+  background: var(--fondo-seccion);
+  border-left: 3px solid color-mix(in srgb, var(--ambito) 60%, transparent);
+  /* En un móvil no se le quita ancho al contenido por el lado derecho: la
+     cabecera ya va justa y el título se partiría en dos líneas. */
+  padding: 0.2rem 0 0.85rem 0.6rem;
+  border-radius: 0 0.75rem 0.75rem 0;
+}
+@media (min-width: 48rem) {
+  #zona-remota, #zona-local { padding: 0.2rem 0.7rem 0.9rem; }
+}
+/* Un poco más de aire entre las dos que entre el resto de bloques. */
+#zona-local { margin-top: 0.5rem; }
+#zona-remota .icono-seccion, #zona-local .icono-seccion { color: var(--ambito); }
+
+/* ── Tarjetas y botones ── */
+.tarjeta {
+  background: var(--fondo-tarjeta); border: 1px solid var(--borde);
+  border-radius: 0.75rem; padding: 1rem;
+  display: flex; flex-direction: column; gap: 0.75rem;
+}
+.tarjeta h2 { font-size: 1rem; }
+.aviso-cerrable { position: relative; padding-right: 2.6rem; }
+/* El div del texto traducible no altera el flex de la tarjeta. */
+.aviso-cerrable > [data-i18n-html] { display: contents; }
+.btn-cerrar-aviso {
+  position: absolute; top: 0.55rem; right: 0.55rem; z-index: 2;
+  width: 1.8rem; height: 1.8rem; padding: 0; display: inline-flex;
+  align-items: center; justify-content: center; border: none; border-radius: 50%;
+  background: transparent; color: var(--texto-suave); cursor: pointer;
+}
+.btn-cerrar-aviso:hover, .btn-cerrar-aviso:focus-visible {
+  background: color-mix(in srgb, var(--texto-suave) 16%, transparent);
+  color: var(--texto);
+}
+.btn-cerrar-aviso .icono { width: 1rem; height: 1rem; }
+/* La casilla del aviso: viene marcada, así que se lee como una confirmación de
+   que ya se ha visto, no como un botón que haya que pulsar. */
+.casilla-aviso { font-size: 0.85rem; color: var(--texto-suave); align-self: flex-start; }
+
+.btn-icono {
+  background: none; border: none; color: var(--texto);
+  font-size: 1.25rem; cursor: pointer; padding: 0.45rem 0.55rem;
+  border-radius: 0.5rem; line-height: 1;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.btn-icono:hover { background: var(--fondo-tarjeta); color: var(--acento); }
+.selector-idioma select {
+  appearance: none; background: var(--fondo-tarjeta); color: var(--texto);
+  border: 1px solid var(--borde); border-radius: 0.45rem; padding: 0.35rem 0.45rem;
+  font: inherit; font-size: 0.75rem; font-weight: 700; cursor: pointer;
+}
+.selector-idioma select:focus { outline: 2px solid var(--acento); border-color: transparent; }
+.sr-solo { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+.btn-primario, .btn-secundario, .btn-peligro {
+  display: inline-block; text-align: center; cursor: pointer;
+  border-radius: 0.5rem; padding: 0.6rem 1.1rem;
+  font-size: 0.95rem; font-weight: 600; border: 1px solid transparent;
+}
+.btn-primario { background: var(--acento-oscuro); color: white; }
+.btn-primario:hover { background: var(--acento); color: var(--sobre-acento); }
+.btn-secundario { background: none; border-color: var(--borde); color: var(--texto); }
+.btn-secundario:hover { border-color: var(--acento); }
+/* El de peligro también: sin medir nada no queda nada que borrar, y el botón
+   se apaga en lugar de desaparecer para que se entienda por qué. */
+.btn-secundario:disabled, .btn-peligro:disabled, .accion-deshabilitada {
+  opacity: 0.45; cursor: not-allowed; pointer-events: none;
+}
+.btn-peligro { background: none; border-color: var(--borde); color: var(--peligro); }
+.btn-peligro:hover { border-color: var(--peligro); }
+
+.fila-botones { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+.ayuda { font-size: 0.85rem; color: var(--texto-suave); }
+
+/* Dispositivos conectados (Ajustes → Nube). */
+.lista-dispositivos { list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 0.6rem; }
+.lista-dispositivos .dispositivo {
+  display: flex; flex-wrap: wrap; gap: 0.5rem 0.75rem;
+  align-items: center; justify-content: space-between;
+  border-top: 1px solid var(--borde); padding-top: 0.6rem;
+}
+.lista-dispositivos .dispositivo:first-child { border-top: none; padding-top: 0; }
+.dispositivo-datos { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+.dispositivo-datos strong { overflow-wrap: anywhere; }
+.dispositivo .fila-botones { flex-wrap: nowrap; }
+.dispositivo .btn-secundario, .dispositivo .btn-peligro {
+  font-size: 0.85rem; padding: 0.35rem 0.7rem;
+}
+
+/* Informe de libros que ya no están (Ajustes → Biblioteca). */
+.informe-limpieza { font-size: 0.88rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.informe-limpieza p { font-size: inherit; color: var(--texto-suave); }
+.informe-limpieza .aviso-limpieza { color: var(--texto); font-weight: 600; }
+.informe-limpieza ul {
+  margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.25rem;
+  color: var(--texto-suave); overflow-wrap: anywhere;
+}
+.ayuda a, .tarjeta a { color: var(--acento); }
+
+/* ── Sección de ayuda ── */
+.tarjeta p { font-size: 0.92rem; }
+.lista-ayuda {
+  padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.45rem;
+  font-size: 0.92rem;
+}
+.lista-ayuda li { padding-left: 0.2rem; }
+/* Los apartados de la ayuda, plegados: cada pestaña se ve entera de un vistazo
+   y se abre solo lo que se busca. Con <details>, el propio navegador se ocupa
+   de abrir, cerrar y anunciar el estado, y el buscador del navegador (Ctrl+F)
+   encuentra el texto de dentro en los que estén abiertos. */
+.puntos-ayuda { display: flex; flex-direction: column; }
+.punto-ayuda { border-top: 1px solid var(--borde); }
+.punto-ayuda:first-child { border-top: 0; }
+.punto-ayuda > summary {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.55rem 0.2rem; cursor: pointer;
+  font-size: 0.92rem; font-weight: 650;
+  list-style: none; /* el triángulo se dibuja aparte, alineado con el texto */
+}
+.punto-ayuda > summary::-webkit-details-marker { display: none; }
+.punto-ayuda > summary::before {
+  content: '›'; flex: none; width: 0.7rem;
+  color: var(--acento); font-size: 1.15em; line-height: 1;
+  transition: transform 0.15s ease;
+}
+.punto-ayuda[open] > summary::before { transform: rotate(90deg); }
+.punto-ayuda > summary:hover { color: var(--acento); }
+.punto-ayuda > summary:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+.punto-ayuda > p {
+  margin: 0 0 0.7rem; padding-left: 1.2rem;
+  color: var(--texto-suave); font-size: 0.9rem;
+}
+/* Tarjetas que se pliegan enteras: las guías de configuración de la nube, que
+   solo interesan a quien va a montarla. Su resumen hace de título. */
+.tarjeta-plegable { gap: 0; }
+.tarjeta-plegable > summary {
+  display: flex; align-items: center; gap: 0.5rem;
+  cursor: pointer; font-size: 1rem; font-weight: 650;
+  list-style: none;
+}
+.tarjeta-plegable > summary::-webkit-details-marker { display: none; }
+.tarjeta-plegable > summary::before {
+  content: '›'; flex: none; width: 0.7rem;
+  color: var(--acento); font-size: 1.2em; line-height: 1;
+  transition: transform 0.15s ease;
+}
+.tarjeta-plegable[open] > summary::before { transform: rotate(90deg); }
+.tarjeta-plegable[open] > summary { margin-bottom: 0.75rem; }
+.tarjeta-plegable > summary:hover { color: var(--acento); }
+.tarjeta-plegable > summary:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+.tarjeta-plegable > :not(summary) { margin-bottom: 0.75rem; }
+.tarjeta-plegable > :last-child { margin-bottom: 0; }
+.tarjeta-plegable.destacado > summary { color: var(--acento); }
+.tarjeta code {
+  background: var(--fondo); border: 1px solid var(--borde); border-radius: 0.35rem;
+  padding: 0.05rem 0.35rem; font-size: 0.85em; word-break: break-all;
+}
+.tarjeta.importante { border-color: var(--aviso); }
+.tarjeta.importante h2 { color: var(--aviso); }
+.tarjeta.destacado { border-color: var(--acento); }
+.tarjeta.destacado h2 { color: var(--acento); }
+
+.libro-ejemplo {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.8rem;
+  padding: 1rem; border: 1px dashed color-mix(in srgb, var(--acento) 70%, var(--borde));
+  border-radius: 0.85rem; background: color-mix(in srgb, var(--acento) 7%, var(--fondo-tarjeta));
+}
+.icono-libro-ejemplo {
+  width: 3rem; height: 3rem; display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: var(--acento-oscuro); color: white;
+}
+.icono-libro-ejemplo .icono { width: 1.55rem; height: 1.55rem; }
+.texto-libro-ejemplo { min-width: 0; }
+.texto-libro-ejemplo h2 { color: var(--acento); font-size: 1rem; }
+.texto-libro-ejemplo p { margin-top: 0.2rem; color: var(--texto-suave); font-size: 0.82rem; }
+.texto-libro-ejemplo strong { color: var(--texto); }
+.botones-libro-ejemplo { display: flex; flex-direction: column; gap: 0.45rem; min-width: 0; }
+.btn-libro-ejemplo {
+  display: flex; align-items: center; gap: 0.5rem;
+  max-width: 16rem; padding: 0.55rem 0.8rem; text-align: left;
+}
+.btn-libro-ejemplo .titulo-ejemplo {
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.btn-libro-ejemplo .formato-ejemplo {
+  flex: none; padding: 0.08rem 0.35rem; border: 1px solid currentColor;
+  border-radius: 0.3rem; font-size: 0.62rem; font-weight: 750; line-height: 1.25;
+  letter-spacing: 0.035em;
+}
+
+.continuar-leyendo {
+  padding: 0.9rem; border: 1px solid color-mix(in srgb, var(--acento) 65%, var(--borde));
+  border-radius: 0.9rem;
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--acento) 13%, var(--fondo-tarjeta)),
+    var(--fondo-tarjeta));
+  box-shadow: 0 0.4rem 1.4rem var(--sombra);
+}
+.cabecera-continuar {
+  display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.7rem;
+  /* Acompaña al plegado: si el hueco de debajo saltara de golpe, la animación
+     de la lista no serviría de nada. */
+  transition: margin-bottom 0.24s ease;
+}
+.cabecera-continuar h2 { color: var(--acento); font-size: 1rem; }
+.cabecera-continuar p { color: var(--texto-suave); font-size: 0.78rem; }
+/* El texto empuja los dos botones al extremo y, como toda la cabecera pliega,
+   se comporta como un mando. */
+.texto-continuar { flex: 1; min-width: 0; cursor: pointer; }
+.cabecera-continuar .btn-icono { flex: none; }
+/* Plegado: se queda la cabecera, que es una línea, y la última lectura sigue
+   a un toque de distancia. */
+.continuar-plegado .cabecera-continuar { margin-bottom: 0; }
+.continuar-plegado .btn-plegar-seccion .icono { transform: rotate(-90deg); }
+.icono-continuar {
+  width: 2.15rem; height: 2.15rem; border-radius: 50%; flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #082f49; background: var(--acento);
+}
+.icono-continuar .icono { width: 1.2rem; height: 1.2rem; }
+.continuar-leyendo .libro {
+  border-color: color-mix(in srgb, var(--acento) 48%, var(--borde));
+  background: color-mix(in srgb, var(--fondo) 48%, var(--fondo-tarjeta));
+  padding-right: 2.8rem;
+}
+.continuar-leyendo li { position: relative; }
+.btn-quitar-continuar {
+  position: absolute; z-index: 2; top: 0.45rem; right: 0.45rem;
+  width: 1.8rem; height: 1.8rem; padding: 0; display: inline-flex;
+  align-items: center; justify-content: center; border: none; border-radius: 50%;
+  background: transparent; color: var(--texto-suave); cursor: pointer;
+}
+.btn-quitar-continuar:hover, .btn-quitar-continuar:focus-visible {
+  background: color-mix(in srgb, var(--peligro) 14%, transparent); color: var(--peligro);
+}
+.btn-quitar-continuar .icono { width: 1rem; height: 1rem; }
+.btn-mas-recientes {
+  display: block; margin: 0.65rem auto 0; padding: 0.25rem 0.65rem;
+  border: none; border-radius: 0.4rem; background: transparent;
+  color: var(--acento); font: inherit; font-size: 0.8rem; font-weight: 650; cursor: pointer;
+}
+.btn-mas-recientes:hover, .btn-mas-recientes:focus-visible {
+  background: color-mix(in srgb, var(--acento) 12%, transparent);
+}
+/* La casilla de la apertura directa cierra el recuadro: un ajuste, no una
+   lectura, así que se separa con una línea y se dice en voz baja. */
+.casilla-abrir-ultimo {
+  margin-top: 0.75rem; padding-top: 0.65rem;
+  border-top: 1px solid color-mix(in srgb, var(--acento) 30%, var(--borde));
+  font-size: 0.8rem; color: var(--texto-suave);
+}
+.continuar-leyendo .libro .portada { width: 3.3rem; height: 4.4rem; }
+.continuar-leyendo .libro .nombre { font-size: 1.05rem; }
+.continuar-leyendo li:not(:first-child) .libro { padding: 0.5rem 2.8rem 0.5rem 0.7rem; }
+.continuar-leyendo li:not(:first-child) .portada { width: 2rem; height: 2.7rem; }
+.continuar-leyendo li:not(:first-child) .nombre { font-size: 0.9rem; }
+.continuar-leyendo li:not(:first-child) .barra-progreso { margin-top: 0.2rem; }
+
+.organizacion-biblioteca { display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.65rem; }
+.organizacion-biblioteca label {
+  display: flex; flex-direction: column; gap: 0.25rem;
+  color: var(--texto-suave); font-size: 0.72rem; font-weight: 650;
+}
+.organizacion-biblioteca select {
+  width: 100%; min-width: 0; padding: 0.5rem 0.65rem;
+  border: 1px solid var(--borde); border-radius: 0.55rem;
+  background: var(--fondo-tarjeta); color: var(--texto); font: inherit; font-size: 0.85rem;
+}
+.organizacion-biblioteca select:focus { outline: 2px solid var(--acento); border-color: transparent; }
+.conmutador-vista {
+  display: flex; flex-direction: column; gap: 0.25rem;
+  color: var(--texto-suave); font-size: 0.72rem; font-weight: 650;
+}
+.grupo-vista {
+  display: flex; border: 1px solid var(--borde); border-radius: 0.55rem;
+  overflow: hidden; align-self: start;
+}
+.grupo-vista button {
+  display: flex; align-items: center; justify-content: center;
+  padding: 0.5rem 0.6rem; border: none; background: var(--fondo-tarjeta);
+  color: var(--texto-suave); cursor: pointer;
+}
+.grupo-vista button + button { border-left: 1px solid var(--borde); }
+.grupo-vista button .icono { width: 1.05rem; height: 1.05rem; }
+.grupo-vista button[aria-pressed="true"] {
+  color: var(--acento);
+  background: color-mix(in srgb, var(--acento) 16%, var(--fondo-tarjeta));
+}
+.grupo-vista button:focus-visible { outline: 2px solid var(--acento); outline-offset: -2px; }
+@media (max-width: 430px) {
+  .organizacion-biblioteca { gap: 0.45rem; }
+  .organizacion-biblioteca select { padding: 0.5rem 0.4rem; font-size: 0.8rem; }
+  .grupo-vista button { padding: 0.5rem 0.45rem; }
+}
+
+/* ── Pie de página ── */
+.pie {
+  margin-top: auto; padding: 0.65rem 0 0.3rem;
+  border-top: 1px solid var(--borde);
+  font-size: 0.78rem; color: var(--texto-suave);
+  text-align: center; line-height: 1.4;
+}
+.pie-principal {
+  display: flex; align-items: baseline; justify-content: center;
+  flex-wrap: wrap; column-gap: 0.35rem;
+}
+.pie a { color: var(--acento); text-decoration: none; }
+.pie a:hover { text-decoration: underline; }
+.creditos-pie { display: inline-block; }
+.creditos-pie summary { color: var(--acento); cursor: pointer; }
+.creditos-pie summary:hover { text-decoration: underline; }
+.creditos-pie[open] { flex-basis: 100%; margin-top: 0.25rem; }
+.creditos-pie p { max-width: 42rem; margin: 0 auto; }
+
+.estado { font-size: 0.9rem; color: var(--texto-suave); min-height: 1.2rem; }
+.estado.error { color: var(--peligro); white-space: pre-wrap; }
+.estado.exito { color: var(--exito); }
+
+.buscador {
+  display: flex; align-items: center; gap: 0.55rem;
+  background: var(--fondo-tarjeta); border: 1px solid var(--borde-fuerte);
+  border-radius: 0.65rem; padding: 0.25rem 0.7rem; color: var(--texto-suave);
+}
+/* El campo ocupa toda la caja, así que el foco se marca sobre la caja entera
+   en lugar de sobre un input sin borde propio. */
+.buscador:focus-within {
+  border-color: var(--acento);
+  outline: 2px solid var(--acento); outline-offset: 1px;
+}
+.buscador .icono { width: 1rem; height: 1rem; }
+.buscador input, .buscador-form input {
+  width: 100%; min-width: 0; background: transparent; border: none;
+  color: var(--texto); font: inherit; padding: 0.45rem 0;
+}
+.buscador input:focus { outline: none; } /* lo marca la caja de alrededor */
+/* La «x» del navegador es diminuta, no se puede tocar con el dedo y no sale en
+   todos: se apaga y se pone una propia, que además cabe en la caja. */
+.buscador input[type="search"]::-webkit-search-cancel-button { display: none; }
+.btn-limpiar-busqueda {
+  flex: none; width: 1.8rem; height: 1.8rem; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: none; border-radius: 50%; background: transparent;
+  color: var(--texto-suave); cursor: pointer;
+}
+.btn-limpiar-busqueda .icono { width: 1rem; height: 1rem; }
+.btn-limpiar-busqueda:hover { background: var(--borde); color: var(--texto); }
+.btn-limpiar-busqueda:focus-visible { outline: 2px solid var(--acento); outline-offset: 1px; }
+.buscador-form input:focus { outline: 2px solid var(--acento); border-color: transparent; }
+
+/* ── Formulario ── */
+form label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.9rem; }
+
+/* Casilla de una preferencia suelta, con la etiqueta al lado y toda la fila
+   como zona de pulsación. */
+.casilla { display: flex; align-items: center; gap: 0.6rem; cursor: pointer; }
+.casilla input {
+  width: 1.1rem; height: 1.1rem; flex: none; margin: 0;
+  accent-color: var(--acento-oscuro); cursor: pointer;
+}
+.casilla input:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+.casilla + .ayuda { margin-top: 0.45rem; }
+form input {
+  background: var(--fondo); border: 1px solid var(--borde-fuerte);
+  border-radius: 0.5rem; padding: 0.55rem 0.7rem;
+  color: var(--texto); font-size: 1rem;
+}
+form input:focus { outline: 2px solid var(--acento); border-color: transparent; }
+
+/* ── Lista de libros ── */
+.destino-arrastre { position: relative; border-radius: 0.75rem; transition: outline-color 0.15s, background 0.15s; }
+.indicador-arrastre {
+  display: none; position: absolute; inset: 0; z-index: 20;
+  align-items: center; justify-content: center; padding: 1rem;
+  border: 2px dashed var(--acento); border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--fondo) 88%, transparent);
+  color: var(--acento); font-weight: 700; text-align: center;
+  pointer-events: none;
+}
+body.arrastrando-archivos .destino-arrastre { outline: 2px dashed var(--borde); outline-offset: 0.35rem; }
+body.arrastrando-archivos .destino-arrastre.sobre-destino .indicador-arrastre { display: flex; }
+/* También al arrastrar un libro local (arrastre interno, sin clase en body). */
+.destino-arrastre.sobre-destino { outline: 2px dashed var(--acento); outline-offset: 0.35rem; }
+.destino-arrastre.sobre-destino .indicador-arrastre { display: flex; }
+
+.carga-local-vacia {
+  width: 100%; min-height: 6.5rem; padding: 1rem;
+  display: flex; align-items: center; justify-content: center; gap: 1rem;
+  border: 2px dashed var(--acento); border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--fondo-tarjeta) 70%, transparent);
+  color: var(--texto); font: inherit; text-align: left; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+}
+.carga-local-vacia:hover {
+  background: color-mix(in srgb, var(--fondo-tarjeta) 82%, var(--acento) 18%);
+  border-color: color-mix(in srgb, var(--acento) 75%, white);
+}
+.carga-local-vacia:active { transform: scale(0.99); }
+.carga-local-vacia:focus-visible { outline: 3px solid var(--acento); outline-offset: 3px; }
+.icono-carga-local {
+  width: 3.25rem; height: 3.25rem; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: var(--acento-oscuro); color: white;
+}
+.icono-carga-local .icono { width: 1.7rem; height: 1.7rem; }
+.texto-carga-local { display: flex; flex-direction: column; gap: 0.3rem; }
+.texto-carga-local strong { color: var(--texto); font-size: 1.05rem; }
+.texto-carga-local > span { color: var(--texto-suave); font-size: 0.88rem; line-height: 1.4; }
+
+.lista-libros { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+/* Las carpetas van en una lista propia, justo encima de la de libros: se
+   despega de ella lo mismo que separa a dos fichas entre sí. */
+.lista-carpetas:not(:empty) { margin-bottom: 0.5rem; }
+.lista-carpetas.vista-cuadricula:not(:empty) { margin-bottom: 0.6rem; }
+.lista-libros li { display: flex; align-items: stretch; gap: 0.4rem; }
+.libro {
+  flex: 1; min-width: 0;
+  display: flex; align-items: center; gap: 0.75rem;
+  background: var(--fondo-tarjeta); border: 1px solid var(--borde);
+  border-radius: 0.75rem; padding: 0.75rem 1rem;
+  cursor: pointer; text-align: left;
+  color: var(--texto); font: inherit;
+}
+/* Botón «⋯» dentro de la ficha: agrupa las acciones en un menú para que
+   cada libro ocupe una sola fila aunque tenga muchas acciones. */
+.btn-menu-libro {
+  flex: none; align-self: stretch; margin: -0.25rem -0.55rem -0.25rem 0;
+  display: flex; align-items: center; justify-content: center;
+  min-width: 2.35rem; padding: 0 0.35rem;
+  background: none; border: none; border-radius: 0.55rem;
+  color: var(--texto-suave); cursor: pointer;
+}
+.btn-menu-libro:hover, .btn-menu-libro:focus-visible {
+  color: var(--acento);
+  background: color-mix(in srgb, var(--acento) 10%, transparent);
+}
+.btn-menu-libro .icono { width: 1.2rem; height: 1.2rem; }
+.estado-sin-conexion {
+  flex: none; color: var(--exito); font-size: 0.62rem; font-weight: 750;
+  line-height: 1.25; white-space: nowrap;
+}
+.estado-sin-conexion.desactualizada { color: var(--aviso); }
+/* De qué carpeta sale un resultado de la búsqueda. En la cuadrícula la ficha
+   es estrecha, así que se le deja recortar el nombre en lugar de desbordar. */
+.carpeta-libro {
+  flex: none; display: inline-flex; align-items: center; gap: 0.2rem; min-width: 0;
+  color: var(--texto-suave); font-size: 0.68rem; line-height: 1.25;
+}
+.carpeta-libro .icono { width: 0.8rem; height: 0.8rem; flex: none; color: var(--aviso); }
+.carpeta-libro span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.libro:hover { border-color: var(--acento); }
+.libro .portada {
+  width: 2.7rem; height: 3.6rem; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--fondo); border: 1px solid var(--borde);
+  border-radius: 0.35rem; overflow: hidden; color: var(--acento);
+}
+.libro .portada .icono { width: 1.5rem; height: 1.5rem; }
+.libro .portada img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.libro .datos {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 0.1rem;
+}
+.libro .cabecera-libro { display: flex; align-items: center; gap: 0.45rem; min-width: 0; }
+.libro .nombre {
+  display: block; flex: 0 1 auto; min-width: 0;
+  font-weight: 600; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+}
+.libro .formato {
+  flex: none; padding: 0.08rem 0.35rem; border: 1px solid currentColor;
+  border-radius: 0.3rem; font-size: 0.62rem; font-weight: 750;
+  line-height: 1.25; letter-spacing: 0.035em;
+}
+.libro .formato-pdf { color: var(--formato-pdf); }
+.libro .formato-epub { color: var(--formato-epub); }
+.libro .formato.sin-texto { color: var(--aviso); }
+.libro .autor {
+  color: var(--texto-suave); font-size: 0.78rem;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.libro .detalle {
+  font-size: 0.8rem; color: var(--texto-suave);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.conteo-carpeta {
+  color: var(--texto-suave); font-size: 0.78rem;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.conteo-carpeta:empty { display: none; }
+.libro .fila-detalle { display: flex; align-items: center; gap: 0.45rem; min-width: 0; }
+.libro .fila-detalle .detalle { flex: 1; min-width: 0; }
+.btn-terminado-en-libro {
+  flex: none; display: inline-flex; align-items: center; gap: 0.25rem;
+  padding: 0.12rem 0.35rem; border: 1px solid var(--borde); border-radius: 999px;
+  background: transparent; color: var(--texto-suave); cursor: pointer;
+  font: inherit; font-size: 0.62rem; font-weight: 700;
+}
+.btn-terminado-en-libro .icono { width: 0.8rem; height: 0.8rem; }
+.btn-terminado-en-libro:hover { color: var(--acento); border-color: var(--acento); }
+.btn-terminado-en-libro.terminado { color: var(--exito); border-color: var(--exito); }
+.btn-terminado-en-libro.terminado:hover, .btn-terminado-en-libro.terminado:focus-visible {
+  color: var(--peligro); border-color: var(--peligro);
+}
+.btn-terminado-en-libro .icono-quitar-terminado { width: 0.7rem; height: 0.7rem; margin-left: 0.05rem; }
+.libro-terminado .barra-progreso > div { background: var(--exito); }
+.libro .barra-progreso {
+  height: 4px; background: var(--borde); border-radius: 2px;
+  margin-top: 0.35rem; overflow: hidden;
+}
+.libro .barra-progreso > div { height: 100%; background: var(--acento); }
+
+/* ── Vista de cuadrícula: fichas verticales de portada grande ── */
+.lista-libros.vista-cuadricula {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(6.4rem, 1fr));
+  gap: 0.6rem; align-items: stretch;
+}
+.vista-cuadricula > li { display: block; }
+.vista-cuadricula .libro {
+  position: relative; height: 100%;
+  flex-direction: column; align-items: stretch; gap: 0.45rem;
+  padding: 0.45rem 0.45rem 0.55rem;
+}
+.vista-cuadricula .libro .portada { width: 100%; height: auto; aspect-ratio: 2 / 3; }
+.vista-cuadricula .libro .portada .icono { width: 2rem; height: 2rem; }
+.vista-cuadricula .libro .detalle,
+.vista-cuadricula .libro .estado-sin-conexion { display: none; }
+.vista-cuadricula .libro .carpeta-libro { max-width: 100%; }
+/* ── Fichas verticales: título, autor y debajo el formato ──
+   En una ficha estrecha nada de esto cabe en línea, así que se apila. El autor
+   es hermano de la cabecera y el formato va dentro de ella, de modo que para
+   intercalarlos hay que disolver la cabecera: con «display: contents» sus
+   piezas pasan a ser hijas de «.datos» y ya se pueden ordenar todas juntas. */
+.vista-cuadricula .libro:not(.carpeta) .cabecera-libro { display: contents; }
+.vista-cuadricula .libro .datos { gap: 0.22rem; }
+.vista-cuadricula .libro .nombre { order: 1; }
+.vista-cuadricula .libro .autor { order: 2; }
+.vista-cuadricula .libro .formato { order: 3; }
+.vista-cuadricula .libro .nota-libro,
+.vista-cuadricula .libro .carpeta-libro { order: 4; }
+.vista-cuadricula .libro .fila-detalle { order: 5; }
+.vista-cuadricula .libro .barra-progreso { order: 6; }
+/* Las chapitas no se estiran de lado a lado: se ciñen a su texto. */
+.vista-cuadricula .libro .formato,
+.vista-cuadricula .libro .nota-libro,
+.vista-cuadricula .libro .carpeta-libro { align-self: flex-start; }
+.vista-cuadricula .libro .autor {
+  font-size: 0.72rem; line-height: 1.3; white-space: normal;
+  display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical;
+}
+.vista-cuadricula .libro .nombre {
+  white-space: normal; font-size: 0.78rem; line-height: 1.3;
+  display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical;
+}
+.vista-cuadricula .libro .fila-detalle { margin-top: auto; }
+.vista-cuadricula .libro .barra-progreso { margin-top: 0.1rem; }
+.vista-cuadricula .btn-menu-libro {
+  position: absolute; top: 0.6rem; right: 0.6rem; margin: 0; align-self: auto;
+  min-width: 0; width: 1.9rem; height: 1.9rem; padding: 0; border-radius: 50%;
+  background: rgba(15, 23, 42, 0.72); color: #e2e8f0;
+}
+.vista-cuadricula .btn-menu-libro:hover, .vista-cuadricula .btn-menu-libro:focus-visible {
+  color: var(--acento); background: var(--velo-denso);
+}
+
+/* De dónde viene el libro: la cabecera de la sección lo dice, pero al recorrer
+   la cuadrícula se pierde de vista y las dos bibliotecas pueden tener el mismo
+   título. La chapita lo lleva encima cada ficha. */
+.marca-origen { display: none; }
+.vista-cuadricula .marca-origen {
+  display: flex; position: absolute; top: 0.6rem; left: 0.6rem;
+  width: 1.35rem; height: 1.35rem; align-items: center; justify-content: center;
+  border-radius: 50%; background: rgba(15, 23, 42, 0.62); color: #e2e8f0;
+}
+/* El círculo se queda oscuro en los dos temas, que va encima de la portada;
+   el color del ámbito lo lleva el icono. */
+.vista-cuadricula .marca-origen.origen-nube { color: #7dd3fc; }
+.vista-cuadricula .marca-origen.origen-dispositivo { color: #cbd5e1; }
+.vista-cuadricula .marca-origen .icono { width: 0.85rem; height: 0.85rem; }
+
+/* Con ratón, el menú «⋯» y el círculo de terminado solo salen sobre la ficha
+   que se está mirando: llenaban la cuadrícula de botones. Donde no hay ratón
+   (táctil) siguen siempre visibles, que si no no habría forma de pulsarlos, y
+   el círculo de un libro ya terminado se queda: ahí es información, no mando. */
+@media (hover: hover) {
+  .vista-cuadricula .btn-menu-libro,
+  .vista-cuadricula .btn-terminado-en-libro:not(.terminado) {
+    opacity: 0; transition: opacity 0.12s;
+  }
+  .vista-cuadricula .libro:hover .btn-menu-libro,
+  .vista-cuadricula .libro:focus-within .btn-menu-libro,
+  .vista-cuadricula .libro:hover .btn-terminado-en-libro,
+  .vista-cuadricula .libro:focus-within .btn-terminado-en-libro {
+    opacity: 1;
+  }
+}
+
+/* El resumen del libro, al dejar el ratón sobre su ficha. Va suelto sobre la
+   página (position: fixed) porque la ficha lo recortaría. */
+.tip-resumen {
+  position: fixed; z-index: 60; max-width: 22rem;
+  display: flex; flex-direction: column; gap: 0.3rem;
+  padding: 0.6rem 0.7rem; border: 1px solid var(--borde); border-radius: 0.6rem;
+  background: var(--fondo-tarjeta); color: var(--texto);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.22);
+  font-size: 0.82rem; line-height: 1.4; pointer-events: none;
+}
+.tip-resumen .titulo-tip { font-size: 0.85rem; font-weight: 700; }
+.tip-resumen .texto-tip { color: var(--texto-suave); }
+/* La nota propia, separada del resumen del editor: son dos voces distintas. */
+.tip-resumen .nota-tip {
+  display: flex; flex-direction: column; gap: 0.15rem;
+  padding-left: 0.55rem; border-left: 2px solid var(--acento);
+}
+.tip-resumen .etiqueta-nota-tip {
+  color: var(--acento); font-size: 0.68rem; font-weight: 750;
+  text-transform: uppercase; letter-spacing: 0.03em;
+}
+.tip-resumen .texto-nota-tip { white-space: pre-wrap; }
+
+/* ── Nota sobre el libro ── */
+/* La nota de la carpeta abierta, bajo su ruta. */
+.nota-carpeta-abierta {
+  display: flex; align-items: flex-start; gap: 0.5rem;
+  padding: 0.45rem 0.55rem; border-left: 2px solid var(--acento);
+  border-radius: 0 0.4rem 0.4rem 0;
+  background: color-mix(in srgb, var(--acento) 6%, transparent);
+}
+.texto-nota-carpeta {
+  flex: 1; min-width: 0; font-size: 0.85rem; line-height: 1.45;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.texto-nota-carpeta.sin-nota { color: var(--texto-suave); font-style: italic; }
+.btn-editar-nota-carpeta { flex: none; }
+
+.nota-libro-lector {
+  display: flex; flex-direction: column; gap: 0.3rem;
+  padding: 0.5rem 0.6rem; border: 1px solid var(--borde);
+  border-left: 2px solid var(--acento); border-radius: 0.5rem;
+  background: var(--fondo);
+}
+.cabecera-nota-lector { display: flex; align-items: center; gap: 0.4rem; }
+.cabecera-nota-lector h3 {
+  flex: 1; min-width: 0; color: var(--acento); font-size: 0.7rem; font-weight: 750;
+  text-transform: uppercase; letter-spacing: 0.03em;
+}
+.cabecera-nota-lector .btn-icono { flex: none; }
+.texto-nota-lector {
+  font-size: 0.85rem; line-height: 1.45; white-space: pre-wrap;
+  overflow-wrap: anywhere; max-height: 11rem; overflow-y: auto;
+}
+/* Sin nota escrita el hueco no se entendería: lo dice, y en gris, que es un
+   aviso y no algo que haya escrito el usuario. */
+.texto-nota-lector.sin-nota { color: var(--texto-suave); font-style: italic; }
+.nota-menu-libro {
+  padding-left: 0.55rem; border-left: 2px solid var(--acento);
+  color: var(--texto); font-size: 0.82rem; line-height: 1.4; white-space: pre-wrap;
+}
+.nota-libro { flex: none; display: inline-flex; align-items: center; color: var(--acento); }
+.nota-libro .icono { width: 0.85rem; height: 0.85rem; }
+.libro-de-la-nota {
+  margin-top: -0.35rem; color: var(--texto-suave); font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+
+/* ── Calificación en estrellas ──
+   El mismo dibujo sirve para las cinco: llena o vacía lo decide el relleno.
+   La media se compone con una copia recortada encima, porque un trazado
+   partido por la mitad no existe en el juego de iconos. */
+.estrellas { display: inline-flex; align-items: center; gap: 0.1rem; }
+.estrella {
+  position: relative; flex: none; display: inline-flex;
+  padding: 0; border: 0; background: transparent; color: var(--texto-suave);
+  line-height: 0;
+}
+.estrella .icono { width: 1rem; height: 1rem; }
+.estrella.llena { color: var(--acento); }
+.estrella.llena .icono { fill: currentColor; }
+.estrella.media .mitad {
+  position: absolute; inset: 0; width: 50%; overflow: hidden; color: var(--acento);
+}
+.estrella.media .mitad .icono { fill: currentColor; }
+button.estrella { cursor: pointer; }
+/* Al apuntar a una estrella se encienden ella y las anteriores: enseña qué
+   calificación se va a dejar antes de soltar el dedo. */
+.estrellas.editable:hover .estrella { color: var(--acento); }
+.estrellas.editable:hover .estrella .icono { fill: currentColor; }
+.estrellas.editable .estrella:hover ~ .estrella { color: var(--texto-suave); }
+.estrellas.editable .estrella:hover ~ .estrella .icono { fill: none; }
+.estrella:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; border-radius: 0.2rem; }
+/* En el diálogo son el control principal de una opinión: algo más grandes que
+   en la ficha, donde solo acompañan al título. */
+.fila-calificacion { display: flex; align-items: center; gap: 0.6rem; margin-top: -0.15rem; }
+.fila-calificacion > span:first-child {
+  color: var(--texto-suave); font-size: 0.75rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.03em;
+}
+.fila-calificacion .estrella .icono { width: 1.35rem; height: 1.35rem; }
+.libro .calificacion-libro { flex: none; }
+.libro .calificacion-libro .estrella .icono { width: 0.78rem; height: 0.78rem; }
+/* Con el dedo, el dibujo de la ficha (12 px) es un blanco imposible. Se
+   ensancha la zona sensible con relleno, no la estrella, y el margen negativo
+   devuelve lo que ese relleno le robaría a la altura de la fila. */
+@media (pointer: coarse) {
+  .fila-calificacion .estrella { padding: 0.3rem; margin: -0.3rem; }
+  .libro .calificacion-libro { gap: 0; }
+  .libro .calificacion-libro .estrella { padding: 0.4rem 0.2rem; margin: -0.4rem 0; }
+  .libro .calificacion-libro .estrella .icono { width: 0.9rem; height: 0.9rem; }
+}
+.cabecera-nota-lector .estrellas { flex: none; }
+.texto-nota-libro {
+  width: 100%; resize: vertical; min-height: 7rem;
+  padding: 0.55rem 0.7rem; border: 1px solid var(--borde-fuerte); border-radius: 0.5rem;
+  background: var(--fondo); color: var(--texto); font: inherit; line-height: 1.5;
+}
+.texto-nota-libro:focus-visible { outline: 2px solid var(--acento); outline-offset: 1px; }
+/* «Borrar» a un lado y las otras dos al otro: no es lo mismo descartar lo
+   escrito ahora que tirar la nota entera. */
+.botones-nota-libro { justify-content: flex-end; }
+.botones-nota-libro .btn-peligro-suave { margin-right: auto; }
+.btn-peligro-suave { color: var(--peligro); }
+
+/* ── Lector ── */
+#vista-lector { background: var(--fondo-lector); height: 100dvh; }
+
+.barra-lector {
+  display: flex; align-items: center; gap: 0.25rem;
+  padding: max(0.4rem, env(safe-area-inset-top)) 0.5rem 0.4rem;
+  background: var(--fondo); border-bottom: 1px solid var(--borde);
+  position: sticky; top: 0; z-index: 10;
+}
+.titulo-libro {
+  flex: 1; min-width: 0; font-size: 0.9rem; font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.separador { width: 0.25rem; }
+.btn-pagina {
+  background: var(--fondo-tarjeta); border: 1px solid var(--borde);
+  color: var(--texto); border-radius: 0.5rem; padding: 0.35rem 0.7rem;
+  font-size: 0.85rem; cursor: pointer; white-space: nowrap;
+}
+.btn-pagina:hover { border-color: var(--acento); }
+/* Los tres mandos del zoom van juntos y sin separación: son una misma cosa,
+   y el marco común lo dice antes de leer nada. El aumento va en medio, donde
+   estaba el icono de la doble flecha, y abre el panel para elegirlo. */
+.grupo-zoom {
+  display: inline-flex; align-items: center; gap: 0; flex: none;
+  border: 1px solid var(--borde); border-radius: 0.6rem;
+}
+.grupo-zoom .btn-icono { border-radius: 0.5rem; }
+.btn-zoom-valor {
+  flex: none; font-size: 0.8rem; min-width: 3.6rem;
+  white-space: nowrap; font-variant-numeric: tabular-nums;
+  border-left: 1px solid var(--borde); border-right: 1px solid var(--borde);
+  border-radius: 0;
+}
+/* Panel del zoom: los valores hechos en rejilla y el campo para escribir uno
+   cualquiera debajo. */
+.panel-zoom { width: min(17rem, calc(100vw - 1rem)); }
+.panel-zoom .fila-botones { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.panel-zoom .fila-botones .btn-secundario { flex: 1; white-space: nowrap; }
+.valores-zoom {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.35rem;
+  margin: 0.8rem 0;
+}
+.valores-zoom button {
+  padding: 0.4rem 0.2rem; font-size: 0.85rem; cursor: pointer;
+  background: none; color: var(--texto);
+  border: 1px solid var(--borde); border-radius: 0.5rem;
+  font-variant-numeric: tabular-nums;
+}
+.valores-zoom button:hover { border-color: var(--acento); color: var(--acento); }
+.valores-zoom button[aria-pressed="true"] {
+  border-color: var(--acento); color: var(--acento); background: var(--fondo-tarjeta);
+}
+.form-zoom { display: flex; align-items: center; gap: 0.4rem; }
+.form-zoom label { font-size: 0.85rem; color: var(--texto-suave); }
+.form-zoom input {
+  flex: 1; min-width: 3rem; padding: 0.4rem 0.5rem; font: inherit; font-size: 0.85rem;
+  background: var(--fondo); color: var(--texto);
+  border: 1px solid var(--borde); border-radius: 0.5rem;
+}
+.panel-zoom .form-zoom .btn-secundario { width: auto; padding: 0.4rem 0.7rem; }
+.grupo-posicion { display: flex; align-items: center; flex: none; }
+.tiempo-restante {
+  flex: none; color: var(--texto-suave); font-size: 0.78rem;
+  white-space: nowrap; margin-left: 0.35rem;
+}
+.barra-lector .btn-icono[aria-pressed="true"] { color: var(--acento); background: var(--fondo-tarjeta); }
+.fila-tiempo-menu {
+  display: flex; align-items: center; gap: 0.7rem;
+  padding: 0.65rem 0.7rem; color: var(--texto-suave); font-size: 0.9rem;
+}
+.fila-tiempo-menu .icono { width: 1.15rem; height: 1.15rem; }
+.grupo-posicion .historial-movil { display: none; }
+.grupo-posicion .btn-pagina { border-radius: 0.5rem; }
+
+.btn-menu-lector { display: none; }
+.fondo-menu-lector { position: fixed; inset: 0; z-index: 95; }
+.menu-lector {
+  position: absolute; top: max(3.45rem, calc(env(safe-area-inset-top) + 2.9rem)); right: 0.35rem;
+  width: min(19rem, calc(100vw - 0.7rem)); max-height: calc(100dvh - 4rem); overflow: auto;
+  background: var(--fondo); border: 1px solid var(--borde); border-radius: 0.75rem;
+  padding: 0.6rem; box-shadow: 0 10px 32px var(--sombra-fuerte);
+  animation: despliegue-menu 0.12s ease-out; transform-origin: top right;
+}
+/* Abierto con el botón derecho: cuelga del puntero, no de la barra. */
+.menu-lector.menu-en-punto {
+  top: auto; right: auto; max-height: calc(100dvh - 3rem); transform-origin: top left;
+}
+.menu-lector.menu-en-punto.abre-arriba { transform-origin: bottom left; }
+.menu-lector h2 {
+  padding: 0.15rem 0.7rem 0.45rem; color: var(--texto-suave); font-size: 0.85rem;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.menu-lector ul { list-style: none; display: flex; flex-direction: column; gap: 0.15rem; }
+.item-menu-lector {
+  width: 100%; display: flex; align-items: center; gap: 0.7rem;
+  padding: 0.65rem 0.7rem; color: var(--texto); background: none; border: none;
+  border-radius: 0.55rem; font: inherit; text-align: left; cursor: pointer;
+}
+.item-menu-lector:hover, .item-menu-lector:focus-visible {
+  background: color-mix(in srgb, var(--acento) 12%, transparent);
+}
+.item-menu-lector .icono { width: 1.15rem; height: 1.15rem; color: var(--texto-suave); }
+.grupo-zoom-menu {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.7rem;
+  padding: 0.4rem 0.35rem 0.4rem 0.7rem; color: var(--texto); font-size: 0.9rem;
+}
+.grupo-zoom-menu > div { display: flex; align-items: center; gap: 0.15rem; }
+.grupo-zoom-menu .btn-icono[aria-pressed="true"] {
+  color: var(--acento); background: var(--fondo-tarjeta);
+}
+
+/* Barra de datos al pie. Una sola línea discreta: en el móvil la barra de
+   arriba ya va llena de botones y ahí no cabía nada más. Si no cupiera (letra
+   grande del sistema, pantalla muy estrecha), se desplaza a lo ancho en lugar
+   de partirse en dos líneas y comerse la lectura. */
+.barra-estado-lector {
+  /* «safe» centra mientras quepa y, cuando no cabe (un EPUB estrecho con el
+     capítulo, la pantalla, el tiempo dedicado y el que queda), deja de centrar
+     en vez de recortar por el principio: lo primero de la fila es lo que se
+     pulsa para ver la ficha del libro, y centrado se salía por la izquierda
+     sin manera de alcanzarlo. */
+  flex: none; display: flex; align-items: center; justify-content: safe center;
+  gap: 0.4rem; overflow-x: auto; scrollbar-width: none;
+  /* Alto de una línea aunque esté vacía: así no baila el área de lectura. */
+  min-height: 1.15rem;
+  padding: 0.25rem 0.6rem calc(0.25rem + env(safe-area-inset-bottom));
+  background: var(--fondo); border-top: 1px solid var(--borde);
+  color: var(--texto-suave); font-size: 0.72rem; white-space: nowrap;
+}
+.barra-estado-lector::-webkit-scrollbar { display: none; }
+.barra-estado-lector .dato-estado { flex: none; }
+/* El aviso de que el tiempo no está contando. En color de aviso porque dice
+   algo que no se deduce de los demás datos, pero sin gritar: sigue siendo la
+   barra de datos y quien lee está leyendo, no atendiendo a esto. */
+.barra-estado-lector .dato-estado-aviso {
+  display: inline-flex; align-items: center; gap: 0.25rem; color: var(--aviso);
+}
+.barra-estado-lector .dato-estado-aviso .icono { width: 0.85em; height: 0.85em; }
+/* El punto de separación es del CSS: así el JavaScript solo pone los datos
+   que tenga, sin preocuparse de cuál es el primero. */
+.barra-estado-lector .dato-estado + .dato-estado::before {
+  content: '·'; margin-right: 0.4rem; color: var(--borde-fuerte);
+}
+/* A pantalla completa no queda nada de interfaz, tampoco esta. */
+#vista-lector.inmersivo .barra-estado-lector { display: none; }
+
+/* Control de la lectura en voz alta mientras suena. Flota sobre el texto, sin
+   estorbarlo: pequeño, translúcido y abajo, donde la vista no está leyendo.
+   Sigue a la vista en el modo inmersivo, porque allí no hay barras a las que
+   volver. */
+/* El contenedor del control: así se va con el lector cuando se cierra, en vez
+   de quedar flotando sobre la biblioteca. */
+#vista-lector { position: relative; }
+.control-voz {
+  position: absolute; z-index: 6;
+  left: 50%; transform: translateX(-50%);
+  bottom: calc(0.9rem + env(safe-area-inset-bottom));
+  display: flex; align-items: center; gap: 0.3rem;
+  padding: 0.25rem; border: 1px solid var(--borde); border-radius: 999px;
+  background: color-mix(in srgb, var(--fondo) 88%, transparent);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+}
+.control-voz[hidden] { display: none; }
+.btn-voz {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.35rem 0.75rem; border: 0; border-radius: 999px;
+  background: transparent; color: var(--texto);
+  font: inherit; font-size: 0.82rem; cursor: pointer;
+}
+.btn-voz svg { width: 1.05em; height: 1.05em; }
+.btn-voz:hover { background: color-mix(in srgb, var(--texto) 10%, transparent); }
+.btn-voz:focus-visible { outline: 2px solid var(--acento); outline-offset: 1px; }
+.btn-voz-icono { padding: 0.35rem 0.5rem; color: var(--texto-suave); }
+
+#area-lectura { flex: 1; min-height: 0; position: relative; overflow: auto; }
+/* touch-action reserva el pellizco de dos dedos para el zoom del PDF (sin él,
+   el navegador ampliaría toda la interfaz). Solo se le quita al navegador
+   donde hay un PDF: en EPUB no habría nada a cambio y quien necesita ampliar
+   se quedaría sin el zoom del sistema. */
+#vista-lector.leyendo-pdf #area-lectura { touch-action: pan-x pan-y; }
+
+/* Modo inmersivo: un toque en el centro oculta la barra; otro la recupera.
+   La barra se recoge en lugar de desaparecer de golpe. Su altura la pone el
+   JavaScript en un valor concreto justo antes de empezar, porque desde «auto»
+   el navegador no sabe animar. El recorte solo dura la animación: los paneles
+   de texto y de voz cuelgan de la barra hacia abajo y un overflow permanente
+   se los comería. */
+.barra-lector {
+  transition: height 0.22s ease, padding 0.22s ease, opacity 0.16s ease,
+    border-width 0.22s ease, visibility 0s;
+}
+.barra-lector.barra-animando, #vista-lector.inmersivo .barra-lector { overflow: hidden; }
+/* Recogida no basta: sus botones seguirían cogiendo el tabulador. La
+   visibilidad se apaga al terminar de recogerse, no antes. */
+#vista-lector.inmersivo .barra-lector {
+  padding-top: 0; padding-bottom: 0; opacity: 0;
+  border-bottom-width: 0; visibility: hidden;
+  transition: height 0.22s ease, padding 0.22s ease, opacity 0.16s ease,
+    border-width 0.22s ease, visibility 0s linear 0.22s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .barra-lector { transition: none; }
+}
+/* La salida, ya que la barra (y con ella su botón) no está. Se mantiene
+   apagada para no competir con la página y se enciende al acercarse. */
+.btn-salir-inmersivo {
+  position: fixed; z-index: 30;
+  top: max(0.5rem, env(safe-area-inset-top)); right: 0.5rem;
+  background: var(--fondo-tarjeta); border: 1px solid var(--borde);
+  border-radius: 50%; opacity: 0.32; transition: opacity 0.15s;
+}
+.btn-salir-inmersivo:hover, .btn-salir-inmersivo:focus-visible { opacity: 1; }
+#vista-lector:not(.inmersivo) .btn-salir-inmersivo { display: none; }
+#area-lectura canvas { cursor: grab; }
+#area-lectura.arrastrando, #area-lectura.arrastrando canvas,
+#area-lectura.arrastrando .capa-texto { cursor: grabbing; }
+#area-lectura.arrastrando { user-select: none; }
+
+/* Contenedor del lector EPUB: ocupa toda el área; epub.js gestiona dentro
+   su propio scroll y paginado. El usuario elige el margen de cada lado. */
+#contenedor-epub {
+  position: absolute; inset: 0;
+  background: var(--papel);
+  --margen-texto: 10%;
+  padding: 0 var(--margen-texto);
+}
+#contenedor-epub iframe { border: none; }
+/* En modo continuo, epub.js ya compensa con scroll la altura de los capítulos
+   que antepone; el anclaje de scroll del navegador la compensaría por segunda
+   vez y los saltos del índice acabarían más adelante del destino. */
+#contenedor-epub .epub-container { overflow-anchor: none; }
+
+/* Selector de márgenes EPUB. Se abre junto al botón de la barra y en móvil
+   usa casi todo el ancho para que el deslizador sea cómodo de tocar. */
+.control-margenes { position: relative; display: flex; }
+.panel-margenes {
+  position: absolute; z-index: 30; top: calc(100% + 0.55rem); right: 0;
+  width: min(20rem, calc(100vw - 1rem));
+  padding: 1rem; border: 1px solid var(--borde); border-radius: 0.75rem;
+  background: var(--fondo-tarjeta); color: var(--texto);
+  box-shadow: 0 10px 32px var(--sombra);
+}
+/* El menú de columnas es una lista de opciones, no un formulario: se apoya en
+   el panel flotante pero con el relleno justo de los botones, que ya traen el
+   suyo. La opción puesta lleva su marca al final, empujada por el nombre. */
+/* El display va con `:not([hidden])` a propósito: un `display` a secas gana al
+   `display: none` que el navegador da a lo oculto, y el menú se quedaba en
+   pantalla —con sus opciones sin repintar— aunque el código lo hubiera
+   cerrado. */
+.panel-columnas:not([hidden]) {
+  display: flex; flex-direction: column; gap: 0.15rem;
+}
+.panel-columnas {
+  width: max-content; min-width: 12rem; max-width: calc(100vw - 1rem);
+  padding: 0.35rem;
+}
+.panel-columnas .item-menu-lector span { flex: 1; }
+.panel-columnas .marca-opcion { color: var(--acento); }
+
+/* ── Pestañas (ajustes y ayuda) ──
+   Una lista entera obligaba a recorrerlo todo para dar con una casilla o con
+   un párrafo. Las pestañas caben en una línea en cualquier pantalla; si no,
+   se deslizan. */
+.pestanas {
+  display: flex; gap: 0.25rem; overflow-x: auto; scrollbar-width: none;
+  padding: 0.25rem; border: 1px solid var(--borde); border-radius: 999px;
+  background: var(--fondo-tarjeta);
+}
+.pestanas::-webkit-scrollbar { display: none; }
+.pestana {
+  flex: 1; white-space: nowrap;
+  padding: 0.5rem 0.85rem; border: 0; border-radius: 999px;
+  background: transparent; color: var(--texto-suave);
+  font: inherit; font-size: 0.92rem; font-weight: 650; cursor: pointer;
+}
+.pestana:hover { background: color-mix(in srgb, var(--texto) 8%, transparent); }
+.pestana[aria-selected="true"] {
+  background: var(--acento-oscuro); color: var(--sobre-acento);
+}
+.pestana:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+.panel-pestana { display: flex; flex-direction: column; gap: 1rem; }
+.panel-pestana[hidden] { display: none; }
+.panel-pestana:focus-visible { outline: none; }
+/* Los desplegables del texto, en dos columnas cuando hay sitio: en una sola
+   fila por ajuste, la tarjeta se hacía muy alta. */
+.rejilla-ajustes {
+  display: grid; gap: 0.4rem 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+.campo-ajuste {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  font-size: 0.95rem;
+}
+.campo-ajuste > span { font-weight: 650; }
+.campo-ajuste select {
+  background: var(--fondo-tarjeta); color: var(--texto);
+  border: 1px solid var(--borde-campo, var(--borde)); border-radius: 0.5rem;
+  padding: 0.35rem 0.5rem; font: inherit; cursor: pointer;
+}
+.campo-ajuste select:focus-visible { outline: 2px solid var(--acento); }
+/* ── Muestras del tema automático (Ajustes → Biblioteca) ──
+   Cada muestra lleva su data-tema, así que se pinta con la paleta de ese tema
+   aunque la aplicación esté en otro: es la única forma de ver el lado que el
+   sistema no está pidiendo ahora mismo sin cambiar el tema del dispositivo.
+   Dentro va lo que de verdad cambia: la barra de la aplicación arriba y el
+   papel del libro debajo, que no son el mismo color. */
+.muestras-tema {
+  display: grid; gap: 0.75rem; margin-top: 0.9rem;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+}
+.muestra-tema {
+  background: var(--fondo); border: 1px solid var(--borde); border-radius: 0.6rem;
+  overflow: hidden;
+}
+.muestra-cabecera {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--borde);
+  color: var(--texto); font-size: 0.85rem; font-weight: 650;
+}
+.muestra-punto {
+  width: 0.7rem; height: 0.7rem; flex: none;
+  border-radius: 50%; background: var(--acento);
+}
+.muestra-pagina {
+  display: flex; flex-direction: column; gap: 0.4rem;
+  padding: 0.7rem 0.6rem; background: var(--papel);
+}
+/* Las rayas hacen de texto: con el color real del cuerpo, para que se vea el
+   contraste que va a tener la lectura y no solo el color del papel. */
+.muestra-pagina span {
+  height: 0.35rem; border-radius: 0.2rem; background: var(--texto); opacity: 0.75;
+}
+.muestra-pagina span:last-child { width: 60%; }
+
+#estado-tema-auto { margin-top: 0.7rem; }
+
+#margen-epub-ajustes { width: 100%; accent-color: var(--acento-oscuro); cursor: pointer; }
+#valor-margen-ajustes { color: var(--acento); font-size: 0.9rem; white-space: nowrap; }
+
+.campo-texto-epub {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  margin-bottom: 0.8rem; font-size: 0.95rem;
+}
+.campo-texto-epub > span { font-weight: 650; }
+.campo-texto-epub select {
+  background: var(--fondo-tarjeta); color: var(--texto);
+  border: 1px solid var(--borde); border-radius: 0.5rem;
+  padding: 0.35rem 0.5rem; font: inherit; cursor: pointer;
+}
+.campo-texto-epub select:focus-visible { outline: 2px solid var(--acento); }
+.cabecera-margenes {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+  margin-bottom: 0.8rem;
+}
+.cabecera-margenes label { font-size: 0.95rem; font-weight: 650; }
+#valor-margen { color: var(--acento); font-size: 0.9rem; white-space: nowrap; }
+#margen-epub { width: 100%; accent-color: var(--acento-oscuro); cursor: pointer; }
+.extremos-margen {
+  display: flex; justify-content: space-between;
+  color: var(--texto-suave); font-size: 0.72rem; margin-top: 0.15rem;
+}
+.panel-margenes .ayuda { margin: 0.75rem 0; }
+.panel-margenes .btn-secundario { width: 100%; padding: 0.45rem 0.8rem; }
+
+/* Panel de lectura en voz alta: mismos estilos que el panel de texto, más
+   la pareja de botones leer/detener. */
+.botones-tts { display: flex; gap: 0.5rem; margin-bottom: 0.8rem; }
+.botones-tts button {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  gap: 0.45rem; padding: 0.5rem 0.6rem; white-space: nowrap;
+}
+.botones-tts .icono { width: 1rem; height: 1rem; flex: none; }
+.panel-margenes .botones-tts .btn-secundario { width: auto; }
+#voz-tts { max-width: 12rem; }
+
+@media (max-width: 600px) {
+  .barra-lector { gap: 0.1rem; padding-left: 0.25rem; padding-right: 0.25rem; }
+  .barra-lector .btn-icono { padding-left: 0.35rem; padding-right: 0.35rem; }
+  .barra-lector .btn-pagina { padding-left: 0.45rem; padding-right: 0.45rem; }
+  .panel-margenes { position: fixed; top: 4rem; left: 0.5rem; right: 0.5rem; width: auto; }
+  .libro { padding: 0.65rem 0.7rem; }
+  /* En la lista el título va a una sola línea con elipsis: así las fichas
+     quedan más compactas y parejas. La cuadrícula, con su selector más
+     específico, conserva sus dos líneas porque ahí el ancho no da para más. */
+  .libro .nombre {
+    flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .libro-ejemplo { grid-template-columns: auto 1fr; }
+  .botones-libro-ejemplo { grid-column: 1 / -1; }
+  .btn-libro-ejemplo { max-width: none; width: 100%; }
+  .btn-libro-ejemplo .titulo-ejemplo { flex: 1; }
+}
+#contenedor-pagina {
+  min-height: 100%; display: flex;
+  justify-content: flex-start; align-items: flex-start; padding: 0.5rem;
+}
+#contenedor-pagina.ajuste-pagina { align-items: center; }
+#contenedor-pagina.continuo {
+  /* flex-start + margin:auto en las páginas: se centran cuando caben y
+     permiten scroll horizontal (sin recorte izquierdo) cuando hay zoom. */
+  flex-direction: column; align-items: flex-start; gap: 0.6rem; padding: 0.6rem 0.5rem;
+}
+/* Envoltorio de cada página del PDF: canvas + capas de texto y enlaces.
+   Centrado con margin:auto: si la página es más ancha que la vista, los
+   márgenes se anulan y el scroll horizontal alcanza toda la página. */
+.pagina-pdf {
+  /* overflow: clip recorta el texto y los enlaces de los márgenes cuando la
+     página se muestra recortada; sus capas se salen del recuadro a propósito. */
+  position: relative; margin: 0 auto; flex: none; overflow: clip;
+  background: white; box-shadow: 0 4px 24px var(--sombra-fuerte); border-radius: 2px;
+}
+/* En modo página las páginas (una o dos, según la vista doble) van dentro
+   de un par que hereda el centrado con margin:auto. */
+/* position:relative para que las páginas vecinas del gesto de arrastre se
+   coloquen respecto a ella y viajen con ella. */
+.par-paginas {
+  position: relative;
+  display: flex; align-items: flex-start; gap: 0.75rem; margin: 0 auto; flex: none;
+}
+
+/* ── Pasar página arrastrando el dedo ── */
+/* Mientras dura el gesto no hay desplazamiento: las páginas vecinas se salen
+   del área a propósito y no deben asomar barras ni rebotes. */
+#area-lectura.gesto-pagina { overflow: hidden; }
+.arrastrando-pagina { will-change: transform; }
+/* La animación es solo al soltar: mientras el dedo manda, la página va con él
+   sin retardo ninguno. */
+.soltando-pagina { transition: transform 0.19s ease-out; }
+/* El tope: al principio y al final del libro la página se asoma y vuelve. La
+   vuelta es más lenta que la ida para que se lea como un rebote y no como una
+   página que se ha quedado a medias. */
+.tope-pagina { animation: tope-pagina 0.28s ease-out; }
+/* Lo que se asoma sale del área: sin esto aparecería una barra horizontal
+   durante el rebote. */
+#area-lectura.tope-en-curso { overflow: hidden; }
+@keyframes tope-pagina {
+  35% { transform: translateX(var(--asomo-tope, 0)); }
+  100% { transform: translateX(0); }
+}
+/* En EPUB lo que se desliza es la tira de columnas del capítulo, y estos
+   avisos de nota cuelgan del contenedor de fuera: si se quedaran quietos
+   flotarían sobre un texto que ya no es el suyo. */
+#area-lectura.gesto-pagina .boton-nota-epub { opacity: 0; }
+.pagina-vecina { position: absolute; top: 0; pointer-events: none; }
+.pagina-vecina.vecina-antes { right: calc(100% + 1rem); }
+.pagina-vecina.vecina-despues { left: calc(100% + 1rem); }
+.par-paginas .pagina-pdf { margin: 0; }
+.par-paginas .pagina-pdf.oculto { display: none; }
+.pagina-pdf canvas { display: block; border-radius: 2px; }
+
+/* Capa de texto de PDF.js: texto invisible superpuesto al canvas para poder
+   seleccionarlo y copiarlo. PDF.js coloca cada tramo con la variable CSS
+   --scale-factor, que fija el propio lector en el envoltorio. */
+.capa-texto {
+  position: absolute; inset: 0; overflow: clip;
+  line-height: 1; text-align: initial; transform-origin: 0 0;
+  forced-color-adjust: none; -webkit-text-size-adjust: none; text-size-adjust: none;
+  caret-color: CanvasText; cursor: grab;
+}
+.capa-texto :is(span, br) {
+  color: transparent; position: absolute; white-space: pre;
+  cursor: text; transform-origin: 0 0;
+}
+.capa-texto span.markedContent { top: 0; height: 0; }
+/* PDF.js coloca el texto en coordenadas de la página sin girar y se limita a
+   anotar el giro en data-main-rotation, dando por hecho que la hoja de estilos
+   lo aplique (su propio visor lo hace así). Sin estas reglas, el texto de una
+   página girada queda descolocado y no se puede seleccionar. */
+.capa-texto[data-main-rotation="90"] { transform: rotate(90deg) translateY(-100%); }
+.capa-texto[data-main-rotation="180"] { transform: rotate(180deg) translate(-100%, -100%); }
+.capa-texto[data-main-rotation="270"] { transform: rotate(270deg) translateX(-100%); }
+.capa-texto ::selection { background: rgba(14, 165, 233, 0.4); }
+
+/* La paleta se aplica con la variable --tinte (componentes RGB); los
+   resaltados antiguos sin color conservan el amarillo, y las notas el azul. */
+.capa-resaltados { position: absolute; z-index: 2; inset: 0; pointer-events: none; }
+.capa-resaltados span {
+  --tinte: 250, 204, 21;
+  position: absolute; border-radius: 2px;
+  background: rgba(var(--tinte), 0.42); mix-blend-mode: multiply;
+}
+.capa-resaltados span.nota {
+  --tinte: 56, 189, 248;
+  background: rgba(var(--tinte), 0.34);
+  border-bottom: 2px solid rgba(var(--tinte), 0.9);
+}
+.capa-resaltados span[data-color="amarillo"] { --tinte: 250, 204, 21; }
+.capa-resaltados span[data-color="verde"] { --tinte: 74, 222, 128; }
+.capa-resaltados span[data-color="azul"] { --tinte: 56, 189, 248; }
+.capa-resaltados span[data-color="rosa"] { --tinte: 244, 114, 182; }
+/* La frase que suena en la lectura en voz alta. Naranja, para no confundirla
+   con un resaltado guardado, y por encima de ellos: es lo que se está mirando
+   ahora mismo. */
+.capa-voz { z-index: 3; }
+.capa-voz span.voz {
+  --tinte: 251, 146, 60;
+  background: rgba(var(--tinte), 0.38);
+  box-shadow: inset 0 -2px 0 rgba(var(--tinte), 0.95);
+  transition: opacity 0.12s ease-in;
+}
+:root:is([data-tema="oscuro"], [data-tema="negro"]) .capa-resaltados span {
+  background: rgba(var(--tinte), 0.46); mix-blend-mode: screen;
+}
+:root:is([data-tema="oscuro"], [data-tema="negro"]) .capa-voz span.voz { background: rgba(var(--tinte), 0.5); }
+:root:is([data-tema="oscuro"], [data-tema="negro"]) .capa-resaltados span.nota {
+  background: rgba(var(--tinte), 0.42);
+  border-bottom-color: rgba(var(--tinte), 0.95);
+}
+
+/* Puntos de la paleta: grandes para elegir, pequeños como indicador. */
+.colores-seleccion { display: flex; align-items: center; gap: 0.45rem; }
+.punto-color {
+  width: 1.7rem; height: 1.7rem; padding: 0; flex: none; cursor: pointer;
+  border: 2px solid rgba(0, 0, 0, 0.25); border-radius: 50%;
+}
+.punto-color:hover, .punto-color:focus-visible {
+  outline: 2px solid var(--acento); outline-offset: 2px;
+}
+.punto-color[aria-pressed="true"] {
+  outline: 3px solid var(--acento); outline-offset: 2px;
+}
+.punto-color-mini {
+  width: 0.7rem; height: 0.7rem; flex: none; display: inline-block;
+  border-radius: 50%; vertical-align: -0.05rem;
+}
+.punto-color[data-color="amarillo"], .punto-color-mini[data-color="amarillo"] { background: #facc15; }
+.punto-color[data-color="verde"], .punto-color-mini[data-color="verde"] { background: #4ade80; }
+.punto-color[data-color="azul"], .punto-color-mini[data-color="azul"] { background: #38bdf8; }
+.punto-color[data-color="rosa"], .punto-color-mini[data-color="rosa"] { background: #f472b6; }
+.colores-editar { margin-bottom: 0.75rem; }
+.boton-nota-margen {
+  position: absolute; right: 0.3rem; transform: translateY(-15%);
+  width: 2rem; height: 2rem; padding: 0; pointer-events: auto;
+  display: grid; place-items: center; border: 1px solid rgba(2, 132, 199, 0.75);
+  border-radius: 50%; background: #e0f2fe; color: #0369a1;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3); font: 700 1rem/1 serif; cursor: pointer;
+}
+.boton-nota-margen:hover, .boton-nota-margen:focus-visible {
+  background: #38bdf8; color: #082f49; outline: 2px solid #ffffff;
+}
+:root:is([data-tema="oscuro"], [data-tema="negro"]) .boton-nota-margen { background: #0c4a6e; color: #bae6fd; }
+
+.ventana-nota {
+  position: fixed; z-index: 80; width: max-content; max-width: min(22rem, calc(100vw - 1rem));
+  max-height: min(16rem, calc(100dvh - 1rem)); overflow: hidden; pointer-events: none;
+  padding: 0.65rem 0.75rem; border: 1px solid rgba(14, 165, 233, 0.7);
+  border-radius: 0.6rem; background: var(--fondo); color: var(--texto);
+  box-shadow: 0 8px 24px var(--sombra); white-space: pre-wrap;
+  overflow-wrap: anywhere; font-size: 0.9rem; line-height: 1.4;
+}
+
+.menu-nota-contextual {
+  position: fixed; z-index: 85; width: 11.5rem; padding: 0.35rem;
+  border: 1px solid var(--borde); border-radius: 0.65rem;
+  background: var(--fondo); color: var(--texto);
+  box-shadow: 0 8px 24px var(--sombra);
+}
+.menu-nota-contextual .item-menu-lector { padding: 0.55rem 0.65rem; }
+
+.boton-nota-epub {
+  position: absolute; z-index: 12; right: auto;
+}
+
+/* Marca temporal de la aparición encontrada por la búsqueda. */
+.capa-busqueda { position: absolute; z-index: 4; inset: 0; pointer-events: none; }
+.capa-busqueda span {
+  position: absolute; border-radius: 2px;
+  background: rgba(14, 165, 233, 0.35); outline: 2px solid rgba(14, 165, 233, 0.75);
+  animation: pulso-busqueda 2.6s ease forwards;
+}
+:root:is([data-tema="oscuro"], [data-tema="negro"]) .capa-busqueda span { mix-blend-mode: screen; }
+@keyframes pulso-busqueda {
+  0% { opacity: 0; }
+  12%, 65% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Enlaces del PDF (índices internos, referencias, webs). */
+.capa-enlaces { position: absolute; z-index: 3; inset: 0; pointer-events: none; }
+.capa-enlaces a { position: absolute; pointer-events: auto; border-radius: 2px; }
+.capa-enlaces a:hover, .capa-enlaces a:focus-visible {
+  background: rgba(14, 165, 233, 0.15);
+  outline: 1px solid rgba(14, 165, 233, 0.6);
+}
+
+/* Papel del PDF. La página es una imagen ya dibujada, así que no se puede
+   recolorear el fondo sin tocar la tinta: se tiñe entera con el filtro que
+   trae el tema (--filtro-pagina, arriba). Va en una variable porque lo
+   comparten la página que se lee y sus miniaturas, que cuelgan de otra parte
+   del documento: así no pueden acabar con temas distintos.
+   La capa de imágenes queda fuera: es justo lo que no debe filtrarse. */
+:is(#area-lectura, .miniatura-pagina) canvas:not(.capa-imagenes) {
+  filter: var(--filtro-pagina);
+}
+/* Copia sin filtro de las ilustraciones, encima de la página invertida: es lo
+   que les devuelve su color. No recibe eventos, para no estorbar a la
+   selección de texto ni a los enlaces que hay debajo. */
+.capa-imagenes {
+  position: absolute; top: 0; left: 0; z-index: 1;
+  pointer-events: none; filter: none; background: none; box-shadow: none;
+}
+/* En modo continuo las zonas de toque laterales estorbarían al scroll. */
+#vista-lector.modo-continuo .zona-toque { display: none; }
+
+.panel-flotante-lector {
+  position: fixed; z-index: 40; top: 3.75rem; right: 0.6rem;
+  width: min(28rem, calc(100vw - 1.2rem)); max-height: calc(100dvh - 4.4rem);
+  overflow: auto; padding: 0.75rem; border: 1px solid var(--borde);
+  border-radius: 0.75rem; background: var(--fondo); color: var(--texto);
+  box-shadow: 0 10px 32px var(--sombra-fuerte);
+}
+/* En pantallas anchas el índice deja de flotar y pasa a ser una barra lateral
+   que estrecha el documento en vez de taparlo, como en los visores de PDF de
+   escritorio. La vista del lector se convierte en una rejilla: la barra de
+   herramientas arriba, el panel a la izquierda y la lectura a la derecha. Los
+   demás paneles siguen flotando (position: fixed) y no entran en la rejilla. */
+@media (min-width: 64rem) {
+  #vista-lector {
+    display: grid; grid-template-columns: auto auto 1fr; grid-template-rows: auto 1fr auto;
+  }
+  #vista-lector > .barra-lector { grid-column: 1 / -1; }
+  #vista-lector > #area-lectura { grid-column: 3; grid-row: 2; }
+  /* Cruza también bajo el índice: es información del libro, no del texto. */
+  #vista-lector > .barra-estado-lector { grid-column: 1 / -1; grid-row: 3; }
+  #panel-indice-libro {
+    position: static; grid-column: 1; grid-row: 2;
+    width: var(--ancho-indice, 19rem); max-height: none; min-height: 0;
+    border-width: 0; border-radius: 0; box-shadow: none;
+  }
+  /* Tirador para cambiar el ancho del panel, entre este y la lectura. */
+  #tirador-indice {
+    display: block; grid-column: 2; grid-row: 2;
+    width: 0.4rem; border-inline: 1px solid var(--borde);
+    background: transparent; cursor: col-resize; touch-action: none;
+  }
+  #tirador-indice:hover, #tirador-indice:focus-visible,
+  #tirador-indice.arrastrando { background: var(--acento); }
+  /* Sin barra de herramientas (modo inmersivo) el panel sube a la primera fila. */
+  #vista-lector.inmersivo :is(#panel-indice-libro, #tirador-indice, > #area-lectura) {
+    grid-row: 1 / -1;
+  }
+}
+
+/* En pantalla estrecha el panel flota y no hay nada que redimensionar. */
+.tirador-panel { display: none; }
+
+/* Las zonas de toque van fijas a la ventana, así que con la barra lateral
+   desplegada la de «página anterior» caería encima del panel y se tragaría
+   los clics del índice, de las miniaturas y del tirador. */
+@media (min-width: 64rem) {
+  #vista-lector.con-barra-lateral .zona-izq { left: calc(var(--ancho-indice, 19rem) + 0.4rem); }
+  /* Y las de arriba y abajo empiezan donde acaba la lateral ya desplazada. */
+  #vista-lector.con-barra-lateral :is(.zona-sup, .zona-inf) {
+    left: calc(var(--ancho-indice, 19rem) + 0.4rem + 18%);
+  }
+}
+
+/* La cabecera se queda arriba al desplazar la lista: en un libro con muchos
+   capítulos, las pestañas y el botón de cerrar se perdían de vista.
+   El hueco de arriba lo pone ella y no el panel: con el padding en el panel,
+   un elemento pegado a top:0 se queda por debajo de ese margen y el contenido
+   asoma por encima al desplazar. Los márgenes negativos laterales la ensanchan
+   hasta los bordes para que tape de lado a lado. */
+:is(#panel-indice-libro, #panel-marcadores, #panel-anotaciones) { padding-top: 0; }
+.cabecera-panel-lector {
+  position: sticky; top: 0; z-index: 3;
+  display: flex; align-items: center; gap: 0.5rem;
+  margin: 0 -0.75rem 0.55rem; padding: 0.75rem 0.75rem 0.55rem;
+  background: var(--fondo);
+}
+.cabecera-panel-lector h2 { flex: 1; font-size: 1rem; }
+/* Pestañas del panel de navegación: índice y miniaturas de las páginas. */
+.pestanas-panel { flex: 1; display: flex; gap: 0.25rem; }
+.pestana-panel {
+  padding: 0.3rem 0.7rem; border: 1px solid transparent; border-radius: 999px;
+  background: none; color: var(--texto-suave); font: inherit; font-size: 0.9rem; cursor: pointer;
+}
+.pestana-panel:hover { color: var(--texto); }
+.pestana-panel[aria-selected="true"] {
+  background: var(--acento-suave, rgba(14, 165, 233, 0.16));
+  border-color: rgba(14, 165, 233, 0.5); color: var(--texto);
+}
+
+/* Una miniatura por fila, como en los visores de PDF de escritorio: en dos
+   columnas, dos páginas contiguas se leen como un pliego, que no es lo que son. */
+.rejilla-miniaturas {
+  display: flex; flex-direction: column; align-items: center; gap: 0.9rem;
+}
+.miniatura-pagina {
+  width: min(20rem, 100%);
+  display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
+  padding: 0.25rem; border: 1px solid transparent; border-radius: 0.45rem;
+  background: none; color: var(--texto-suave); font: inherit; font-size: 0.78rem;
+  cursor: pointer;
+}
+.miniatura-pagina:hover, .miniatura-pagina:focus-visible { border-color: var(--borde); color: var(--texto); }
+.miniatura-pagina[aria-current="true"] {
+  border-color: rgba(14, 165, 233, 0.8); color: var(--texto);
+}
+/* El hueco reserva el sitio antes de dibujar, para que la rejilla no salte. */
+/* Cada hoja va en su propio recuadro: deja claro dónde acaba una página y
+   empieza la siguiente. Antes de dibujarse reserva el sitio, sin saltos. */
+/* El canvas y su capa de imágenes comparten celda, así se escalan igual. */
+.miniatura-pagina .hoja > * { grid-area: 1 / 1; }
+.miniatura-pagina .capa-imagenes { position: static; max-width: 100%; max-height: 100%; }
+.miniatura-pagina .hoja {
+  width: 100%; aspect-ratio: 3 / 4; display: grid; place-items: center;
+  padding: 0.2rem; background: rgba(148, 163, 184, 0.12);
+  border: 1px solid var(--borde); border-radius: 0.3rem; overflow: hidden;
+}
+.miniatura-pagina canvas:not(.capa-imagenes) {
+  display: block; max-width: 100%; max-height: 100%;
+  background: white; box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+}
+.miniatura-pagina[aria-current="true"] canvas { outline: 2px solid rgba(14, 165, 233, 0.9); }
+
+.lista-indice-libro { list-style: none; display: flex; flex-direction: column; gap: 0.25rem; }
+.entrada-indice-libro {
+  width: 100%; display: flex; align-items: baseline; gap: 0.65rem;
+  background: none; border: 1px solid transparent; border-radius: 0.45rem;
+  padding-top: 0.45rem; padding-right: 0.65rem; padding-bottom: 0.45rem;
+  color: var(--texto); font: inherit; text-align: left; cursor: pointer;
+}
+.entrada-indice-libro:hover, .entrada-indice-libro:focus-visible {
+  border-color: var(--acento); background: var(--fondo-tarjeta);
+}
+/* Capítulo por el que se va: se marca con una barra al margen además del
+   color, para que no dependa solo de este. */
+.entrada-indice-libro[aria-current="true"] {
+  background: color-mix(in srgb, var(--acento) 14%, transparent);
+  border-color: color-mix(in srgb, var(--acento) 45%, transparent);
+  box-shadow: inset 0.18rem 0 0 var(--acento);
+  font-weight: 650;
+}
+.entrada-indice-libro[aria-current="true"] .pagina-entrada-indice { color: var(--texto); }
+.entrada-indice-libro .titulo-entrada-indice { flex: 1; min-width: 0; line-height: 1.3; }
+.entrada-indice-libro .pagina-entrada-indice {
+  flex: none; color: var(--texto-suave); font-size: 0.75rem; white-space: nowrap;
+}
+.historial-navegacion {
+  flex: none; display: flex; align-items: center; gap: 0.05rem;
+  margin-left: 0.15rem; padding-left: 0.25rem; border-left: 1px solid var(--borde);
+}
+.historial-navegacion .btn-icono { color: var(--acento); }
+.historial-navegacion .btn-icono:disabled { color: var(--texto-suave); opacity: 0.4; cursor: default; }
+.historial-navegacion .btn-icono:disabled:hover { background: none; }
+.btn-pagina.tiene-historial { border-color: var(--acento); }
+
+@media (max-width: 700px), (pointer: coarse) {
+  .barra-lector .historial-navegacion { display: none !important; }
+  .grupo-posicion.tiene-historial .historial-movil { display: inline-flex; }
+  .grupo-posicion .historial-movil:disabled {
+    color: var(--texto-suave); opacity: 0.4; cursor: default;
+  }
+  .grupo-posicion .historial-movil:first-child {
+    border: 1px solid var(--borde); border-right: 0; border-radius: 0.5rem 0 0 0.5rem;
+  }
+  .grupo-posicion.tiene-historial .btn-pagina { border-radius: 0; }
+  .grupo-posicion .historial-movil:last-child {
+    border: 1px solid var(--borde); border-left: 0; border-radius: 0 0.5rem 0.5rem 0;
+  }
+  .barra-lector > #btn-subir,
+  .barra-lector > #btn-indice-libro,
+  .barra-lector > #btn-anotaciones,
+  .barra-lector > #btn-modo,
+  .barra-lector > #btn-rotar,
+  .barra-lector > #btn-pagina-completa,
+  .barra-lector > #btn-imprimir,
+  .barra-lector > .tiempo-restante { display: none !important; }
+  .barra-lector > #control-texto:not(.oculto),
+  .barra-lector > #control-columnas:not(.oculto) { width: 0; overflow: visible; }
+  .barra-lector > #control-texto > #btn-texto,
+  .barra-lector > #control-columnas > #btn-columnas { display: none; }
+  /* El grupo del zoom se va al menú, pero su contenedor sigue montado: el
+     panel se abre desde allí y necesita seguir teniendo sitio en el DOM. */
+  .barra-lector > #control-zoom { width: 0; overflow: visible; border: 0; }
+  .barra-lector > #control-zoom > .btn-icono { display: none; }
+  .barra-lector > #control-tts { width: 0; overflow: visible; }
+  .barra-lector > #control-tts > #btn-tts { display: none; }
+  .barra-lector .btn-menu-lector { display: inline-flex; margin-left: auto; }
+  .barra-lector .separador { display: none; }
+}
+
+@media (max-width: 430px) {
+  .barra-lector .titulo-libro { display: none; }
+}
+.buscador-form { display: flex; align-items: center; gap: 0.4rem; }
+.buscador-form input {
+  background: var(--fondo-tarjeta); border: 1px solid var(--borde-fuerte);
+  border-radius: 0.5rem; padding: 0.55rem 0.7rem;
+}
+.buscador-form .btn-primario { padding: 0.55rem 0.8rem; }
+.resultados-busqueda { list-style: none; display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.55rem; }
+.resultado-busqueda {
+  width: 100%; background: var(--fondo-tarjeta); border: 1px solid var(--borde);
+  border-radius: 0.5rem; padding: 0.55rem 0.7rem; color: var(--texto);
+  text-align: left; cursor: pointer;
+}
+.resultado-busqueda:hover { border-color: var(--acento); }
+.resultado-busqueda strong { display: block; color: var(--acento); margin-bottom: 0.15rem; }
+.resultado-busqueda span { color: var(--texto-suave); font-size: 0.82rem; line-height: 1.35; }
+
+.barra-seleccion {
+  position: fixed; z-index: 70; left: 50%; bottom: max(0.75rem, env(safe-area-inset-bottom));
+  transform: translateX(-50%); display: flex; align-items: center; gap: 0.4rem;
+  max-width: calc(100vw - 1rem); padding: 0.45rem;
+  background: var(--fondo); border: 1px solid var(--borde); border-radius: 0.75rem;
+  box-shadow: 0 10px 32px var(--sombra-fuerte);
+}
+.barra-seleccion .btn-primario, .barra-seleccion .btn-secundario {
+  display: flex; align-items: center; gap: 0.4rem; white-space: nowrap;
+  padding: 0.55rem 0.7rem;
+}
+.barra-seleccion .icono { width: 1.05rem; height: 1.05rem; }
+.lista-anotaciones { list-style: none; display: flex; flex-direction: column; gap: 0.45rem; }
+.buscador-anotaciones { margin-bottom: 0.55rem; }
+.fila-anotacion {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center; gap: 0.2rem; border-bottom: 1px solid var(--borde); padding-bottom: 0.4rem;
+}
+.ir-anotacion {
+  min-width: 0; padding: 0.45rem 0.55rem; border: 0; border-radius: 0.45rem;
+  background: none; color: var(--texto); text-align: left; cursor: pointer;
+}
+.ir-anotacion:hover, .ir-anotacion:focus-visible { background: var(--fondo-tarjeta); }
+.texto-anotacion, .nota-anotacion { display: block; overflow: hidden; text-overflow: ellipsis; }
+.texto-anotacion { white-space: nowrap; font-size: 0.9rem; }
+.nota-anotacion { color: var(--acento); font-size: 0.8rem; white-space: nowrap; margin-top: 0.15rem; }
+.ubicacion-anotacion {
+  display: flex; align-items: center; gap: 0.35rem;
+  color: var(--texto-suave); font-size: 0.75rem;
+}
+
+/* ── Subcarpetas de la nube ── */
+.ruta-carpeta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.15rem;
+  font-size: 0.85rem; margin: 0.4rem 0 0.15rem;
+}
+.miga {
+  background: none; border: none; padding: 0.1rem 0.25rem; font: inherit;
+  color: var(--acento); cursor: pointer; border-radius: 0.3rem;
+}
+.miga:hover, .miga:focus-visible { text-decoration: underline; }
+.separador-miga { color: var(--texto-suave); }
+.miga-actual { color: var(--texto); font-weight: 600; padding: 0.1rem 0.25rem; }
+.libro .portada-carpeta {
+  /* Cuadrado y no con la proporción de una portada: dentro solo hay un icono,
+     y de paso la fila queda más baja. */
+  width: 2.4rem; height: 2.4rem;
+  color: var(--aviso);
+  background: color-mix(in srgb, var(--aviso) 12%, var(--fondo));
+  border-color: color-mix(in srgb, var(--aviso) 35%, var(--borde));
+}
+/* Una carpeta no necesita el alto de una portada para enseñar un icono, ni
+   siquiera en la cuadrícula: allí se queda como una tira, con el icono al
+   lado del nombre. Una caja alta y vacía junto a las portadas de los libros
+   ocupaba mucho para lo poco que dice. Como las carpetas van en su propia
+   lista (ver .lista-carpetas), los libros empiezan justo debajo, sin hueco. */
+/* Las tres clases juntas para ganar a la rejilla de libros, que se redefine
+   más abajo con columnas más anchas para las portadas. */
+.lista-libros.lista-carpetas.vista-cuadricula {
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+}
+.vista-cuadricula .libro.carpeta {
+  flex-direction: row; align-items: center; gap: 0.55rem;
+  padding: 0.5rem 0.6rem;
+}
+.vista-cuadricula .libro.carpeta .portada-carpeta {
+  width: 2.1rem; height: 2.1rem; aspect-ratio: auto; flex: none;
+}
+.vista-cuadricula .libro.carpeta .portada-carpeta .icono { width: 1.2rem; height: 1.2rem; }
+.vista-cuadricula .libro.carpeta .datos { gap: 0.1rem; }
+.vista-cuadricula .libro.carpeta .nombre { -webkit-line-clamp: 1; line-clamp: 1; }
+/* El menú vuelve a la fila: en una tira no hay esquina donde flotar. */
+.vista-cuadricula .libro.carpeta .btn-menu-libro {
+  position: static; flex: none; width: 1.7rem; height: 1.7rem;
+  background: transparent; color: var(--texto-suave);
+}
+/* Destino resaltado al arrastrar un libro hasta una carpeta o una miga. */
+.libro.carpeta.destino-mover { border-color: var(--acento); background: var(--fondo-tarjeta); }
+.miga.destino-mover {
+  outline: 2px solid var(--acento); outline-offset: 1px;
+  background: var(--fondo-tarjeta); text-decoration: none;
+}
+
+.dialogo-fondo {
+  position: fixed; inset: 0; z-index: 95;
+  background: var(--velo);
+  display: flex; align-items: center; justify-content: center; padding: 1rem;
+}
+.dialogo {
+  width: min(26rem, 100%); max-height: min(34rem, 90dvh); overflow: auto;
+  background: var(--fondo); border: 1px solid var(--borde); border-radius: 0.75rem;
+  padding: 1rem; box-shadow: 0 10px 32px var(--sombra-fuerte);
+  display: flex; flex-direction: column; gap: 0.55rem;
+}
+.dialogo h2 { font-size: 1rem; }
+.pasos-ocr { margin-left: 1.25rem; display: flex; flex-direction: column; gap: 0.35rem; }
+.dialogo-pdf-sin-texto .fila-botones { justify-content: flex-end; }
+.dialogo-editar-nota { width: min(32rem, 100%); }
+
+/* Imprimir el EPUB. Más ancho que un diálogo normal porque lleva dentro la
+   lista de capítulos, que son títulos largos. */
+.dialogo-imprimir { width: min(34rem, 100%); max-height: min(38rem, 90dvh); }
+.opciones-impresion {
+  display: flex; flex-wrap: wrap; gap: 0.6rem;
+}
+.opcion-impresion {
+  display: flex; flex-direction: column; gap: 0.2rem;
+  font-size: 0.85rem; color: var(--texto-suave); flex: 1 1 8rem;
+}
+/* El número exacto, debajo de su lista y solo cuando se pide a medida. Los
+   campos son estrechos a propósito: caben tres milímetros o dos puntos. */
+.medida-personal { display: flex; align-items: center; gap: 0.3rem; }
+.medida-personal input {
+  width: 4rem; min-width: 0;
+  background: var(--fondo); border: 1px solid var(--borde-fuerte);
+  border-radius: 0.5rem; padding: 0.3rem 0.4rem;
+  color: var(--texto); font-size: 0.9rem;
+}
+.medida-personal .unidad { color: var(--texto-suave); }
+.opciones-impresion select {
+  background: var(--fondo); border: 1px solid var(--borde-fuerte);
+  border-radius: 0.5rem; padding: 0.4rem 0.5rem;
+  color: var(--texto); font-size: 0.95rem;
+}
+.capitulos-impresion {
+  display: flex; flex-direction: column; min-height: 6rem;
+  border: 1px solid var(--borde); border-radius: 0.5rem; overflow: hidden;
+}
+.cabecera-capitulos-impresion {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--borde);
+  font-size: 0.85rem; color: var(--texto-suave);
+}
+.lista-capitulos-impresion {
+  list-style: none; margin: 0; padding: 0.4rem 0.6rem; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 0.25rem;
+}
+.lista-capitulos-impresion .casilla { font-size: 0.9rem; }
+/* Un botón que se lee como un enlace: acompaña a la lista sin competir con
+   los botones de abajo, que son los que deciden. */
+.btn-enlace {
+  background: none; border: none; padding: 0.1rem 0.25rem;
+  color: var(--acento); font: inherit; cursor: pointer; border-radius: 0.3rem;
+}
+.btn-enlace:hover { text-decoration: underline; }
+.btn-enlace:focus-visible { outline: 2px solid var(--acento); outline-offset: 1px; }
+/* El documento que se va a imprimir se compone aquí dentro: tiene que existir
+   y estar maquetado, pero no verse. `display: none` no vale, que entonces el
+   navegador no lo pinta y saldrían hojas en blanco. */
+.marco-impresion {
+  position: fixed; left: -10000px; top: 0;
+  width: 210mm; height: 297mm; border: 0; visibility: hidden;
+}
+
+/* Registro de actividad: una lista larga que se lee de arriba abajo, con el
+   error destacado por color porque es lo que se viene a buscar. */
+.dialogo-registro { width: min(40rem, 100%); max-height: min(40rem, 90dvh); }
+.botones-registro { justify-content: flex-end; flex-wrap: wrap; }
+.botones-registro .btn-peligro-suave { margin-right: auto; }
+.lista-registro {
+  list-style: none; margin: 0; padding: 0; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 0.3rem;
+}
+.evento-registro {
+  border-left: 3px solid var(--borde); padding: 0.3rem 0 0.3rem 0.6rem;
+  font-size: 0.85rem; line-height: 1.35;
+}
+.evento-registro time { color: var(--texto-suave); font-variant-numeric: tabular-nums; }
+.evento-registro .que-paso { margin-left: 0.5rem; font-weight: 600; }
+.evento-registro.nivel-error { border-left-color: var(--peligro); }
+.evento-registro.nivel-ok { border-left-color: var(--exito, var(--acento)); }
+.detalle-registro { margin: 0.15rem 0 0; color: var(--texto-suave); word-break: break-word; }
+.fragmento-editar-nota {
+  color: var(--texto-suave); font-size: 0.85rem; line-height: 1.35;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3;
+  line-clamp: 3; overflow: hidden;
+}
+.dialogo-editar-nota textarea {
+  width: 100%; resize: vertical; min-height: 8rem; max-height: 55dvh;
+  padding: 0.65rem 0.7rem; border: 1px solid var(--borde); border-radius: 0.55rem;
+  background: var(--fondo-tarjeta); color: var(--texto); font: inherit; line-height: 1.4;
+}
+.dialogo-editar-nota textarea:focus { outline: 2px solid var(--acento); border-color: transparent; }
+.botones-editar-nota { justify-content: flex-end; }
+.dialogo-contrasena-pdf input {
+  width: 100%; margin-top: 0.3rem; padding: 0.6rem 0.7rem;
+  border: 1px solid var(--borde); border-radius: 0.5rem;
+  background: var(--fondo-tarjeta); color: var(--texto); font: inherit;
+}
+.dialogo-contrasena-pdf input:focus { outline: 2px solid var(--acento); border-color: transparent; }
+.botones-dialogo { justify-content: flex-end; }
+
+/* Ilustración a pantalla completa. El fondo va oscuro en los dos temas: aquí
+   manda la imagen, y el velo claro de los demás diálogos la deslavaba. */
+.visor-imagen { background: rgba(0, 0, 0, 0.88); padding: 0; cursor: zoom-out; }
+/* Aparecer y desaparecer de golpe, tapando la página entera, se lee como un
+   salto: por un momento no se sabe si se ha cambiado de sitio. El velo se
+   funde y la imagen crece un pelo desde donde estaba.
+   El visor se esconde con «display: none», que no se puede interpolar, así que
+   la salida necesita `allow-discrete`: sin eso la entrada se vería y la
+   salida no. Donde el navegador no lo entienda, aparece y desaparece sin más,
+   que es como estaba. */
+.visor-imagen, .visor-imagen img {
+  transition: opacity 180ms ease, transform 180ms ease,
+              display 180ms allow-discrete;
+}
+.visor-imagen.oculto { opacity: 0; }
+.visor-imagen.oculto img { transform: scale(0.96); }
+@starting-style {
+  .visor-imagen:not(.oculto) { opacity: 0; }
+  .visor-imagen:not(.oculto) img { transform: scale(0.96); }
+}
+/* Ocupa toda la pantalla, no el tamaño que tuviera en la página: con
+   `max-width` la ilustración se abría igual de pequeña que en el libro, que es
+   justo lo que se venía a resolver. `contain` conserva la proporción. */
+.visor-imagen img {
+  width: 100%; height: 100dvh; object-fit: contain;
+}
+.btn-cerrar-imagen {
+  position: absolute; top: max(0.5rem, env(safe-area-inset-top)); right: 0.5rem;
+  width: 2.5rem; height: 2.5rem; padding: 0; display: inline-flex;
+  align-items: center; justify-content: center; border: none; border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5); color: #fff; cursor: pointer;
+}
+.btn-cerrar-imagen:hover, .btn-cerrar-imagen:focus-visible { background: rgba(0, 0, 0, 0.75); }
+.btn-cerrar-imagen .icono { width: 1.4rem; height: 1.4rem; }
+
+/* ── Menú de acciones de un libro o carpeta ── */
+/* Se despliega junto al botón «⋯»; la capa transparente solo captura el
+   toque fuera del menú para cerrarlo. */
+.fondo-menu-libro { position: fixed; inset: 0; z-index: 95; }
+.menu-libro {
+  position: absolute;
+  min-width: 13rem; max-width: min(20rem, calc(100vw - 1rem));
+  background: var(--fondo); border: 1px solid var(--borde);
+  border-radius: 0.75rem; padding: 0.6rem;
+  box-shadow: 0 10px 32px var(--sombra-fuerte);
+  display: flex; flex-direction: column; gap: 0.4rem;
+  transform-origin: top right;
+  animation: despliegue-menu 0.12s ease-out;
+}
+.menu-libro.abre-arriba { transform-origin: bottom right; }
+@keyframes despliegue-menu {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.menu-libro h2 {
+  font-size: 0.85rem; font-weight: 650; color: var(--texto-suave); line-height: 1.35;
+  display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+/* Las estrellas del menú se pulsan con el dedo tanto como las de la ficha,
+   pero aquí hay sitio de sobra: se dibujan a su tamaño natural. */
+#calificacion-menu-libro { margin: -0.1rem 0 0.1rem; }
+#calificacion-menu-libro .estrella { padding: 0.25rem 0.2rem; margin: -0.25rem 0; }
+#calificacion-menu-libro .estrella .icono { width: 1.05rem; height: 1.05rem; }
+/* El resumen del libro, bajo su título. Se corta a unas pocas líneas para que
+   el menú no crezca hasta ocupar la pantalla. */
+#resumen-menu-libro {
+  font-size: 0.78rem; line-height: 1.4; color: var(--texto-suave);
+  margin: -0.15rem 0 0.1rem;
+  display: -webkit-box; -webkit-line-clamp: 7; line-clamp: 7; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.menu-libro ul { list-style: none; display: flex; flex-direction: column; gap: 0.15rem; }
+.item-menu-libro {
+  width: 100%; display: flex; align-items: center; gap: 0.7rem;
+  padding: 0.65rem 0.7rem; background: none; border: none; border-radius: 0.55rem;
+  color: var(--texto); font: inherit; text-align: left; cursor: pointer;
+}
+.item-menu-libro:hover, .item-menu-libro:focus-visible {
+  background: color-mix(in srgb, var(--acento) 12%, transparent);
+}
+.item-menu-libro .icono { width: 1.15rem; height: 1.15rem; flex: none; color: var(--texto-suave); }
+.item-menu-peligro { color: var(--peligro); }
+.item-menu-peligro .icono { color: inherit; }
+.item-menu-peligro:hover, .item-menu-peligro:focus-visible {
+  background: color-mix(in srgb, var(--peligro) 12%, transparent);
+}
+.item-sin-conexion-disponible .icono { color: var(--exito); }
+.item-sin-conexion-desactualizada .icono { color: var(--aviso); }
+.lista-carpetas-mover {
+  list-style: none; display: flex; flex-direction: column; gap: 0.25rem;
+  min-height: 5rem;
+}
+.entrada-carpeta-mover { align-items: center; gap: 0.5rem; padding-left: 0.65rem; }
+.entrada-carpeta-mover .icono { color: var(--aviso); }
+.botones-mover { justify-content: flex-end; flex-wrap: wrap; }
+.botones-mover .btn-primario:disabled {
+  opacity: 0.45; cursor: not-allowed;
+  background: var(--acento-oscuro); color: white;
+}
+
+/* ── Panel de marcadores ── */
+.form-anadir-marcador { margin-bottom: 0.6rem; }
+.form-anadir-marcador input {
+  width: 100%; margin-bottom: 0.4rem; background: var(--fondo-tarjeta);
+  border: 1px solid var(--borde); border-radius: 0.5rem;
+  padding: 0.55rem 0.7rem; color: var(--texto); font: inherit;
+}
+.form-anadir-marcador input:focus { outline: 2px solid var(--acento); border-color: transparent; }
+.btn-anadir-marcador {
+  display: flex; align-items: center; justify-content: center; gap: 0.45rem;
+  width: 100%;
+}
+.btn-anadir-marcador .icono-boton { display: inline-flex; }
+.panel-marcadores .estado { margin-bottom: 0.3rem; }
+.fila-marcador { display: flex; align-items: center; gap: 0.25rem; }
+.fila-marcador .entrada-indice-libro { padding-left: 0.65rem; }
+.btn-editar-marcador, .btn-borrar-marcador { flex: none; color: var(--texto-suave); }
+.btn-editar-marcador:hover { color: var(--acento); }
+.btn-borrar-marcador:hover { color: var(--peligro); }
+
+.zona-toque {
+  position: fixed; top: 20%; bottom: 10%; width: 18%;
+  background: none; border: none; cursor: pointer; z-index: 5;
+  color: transparent;
+}
+.zona-izq { left: 0; }
+.zona-der { right: 0; }
+/* Las bandas de arriba y de abajo se quedan en la franja central: a los lados
+   ya mandan las laterales, y solapadas no se sabría cuál se pulsa. La de
+   arriba llega hasta el borde de la ventana porque la barra de herramientas
+   va por encima (z-index mayor) y se queda con su parte; la de abajo se para
+   antes de la barra de estado, que también se pulsa. */
+.zona-sup, .zona-inf { top: auto; bottom: auto; left: 18%; right: 18%; width: auto; height: 20%; }
+.zona-sup { top: 0; }
+.zona-inf { bottom: calc(1.9rem + env(safe-area-inset-bottom)); }
+
+/* ── Aviso de posición de otro dispositivo ──
+   Se queda hasta que se responde (a diferencia del toast, que se va solo):
+   es una decisión, no una noticia. Va donde el toast para no tapar el texto
+   del libro, pero por encima de él. */
+.aviso-posicion {
+  position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+  background: var(--fondo-tarjeta); border: 1px solid var(--acento);
+  border-radius: 0.75rem; padding: 0.8rem 1rem; font-size: 0.9rem;
+  z-index: 101; max-width: min(90vw, 28rem);
+  display: flex; flex-direction: column; gap: 0.7rem;
+  box-shadow: 0 4px 16px var(--sombra);
+}
+.aviso-posicion.oculto { display: none; }
+.acciones-aviso-posicion { display: flex; gap: 0.5rem; justify-content: flex-end; }
+.acciones-aviso-posicion button { padding: 0.4rem 0.9rem; }
+
+/* ── Toast y carga ── */
+.toast {
+  position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+  background: var(--fondo-tarjeta); border: 1px solid var(--borde);
+  border-radius: 0.75rem; padding: 0.6rem 1.2rem; font-size: 0.9rem;
+  z-index: 100; max-width: 90vw; text-align: center;
+  box-shadow: 0 4px 16px var(--sombra);
+}
+
+.cargando {
+  position: fixed; inset: 0; z-index: 90;
+  background: var(--velo-denso);
+  display: flex; flex-direction: column; gap: 1rem;
+  align-items: center; justify-content: center;
+}
+.ruedecilla {
+  width: 2.5rem; height: 2.5rem; border-radius: 50%;
+  border: 4px solid var(--borde); border-top-color: var(--acento);
+  animation: girar 0.8s linear infinite;
+}
+@keyframes girar { to { transform: rotate(360deg); } }
+
+/* ── Menos movimiento ──
+   Quien lo pide en su sistema (por mareo o migraña) no debería tener que ver
+   los despliegues ni el resaltado pulsante. La ruedecilla sigue girando,
+   porque sin ella no se distingue una carga de una pantalla congelada, pero
+   mucho más despacio. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .ruedecilla {
+    animation-duration: 2.4s !important;
+    animation-iteration-count: infinite !important;
+  }
+  /* El resaltado del resultado de búsqueda se apaga solo al terminar su
+     animación: sin ella se queda fijo (y visible) hasta cambiar de página. */
+  .capa-busqueda span { animation: none !important; opacity: 1; }
+}
+
+/* ── Biblioteca en pantallas anchas ──
+   Continúa el bloque de más arriba: aquí van los cambios de disposición que
+   solo tienen sentido cuando sobra ancho. */
+@media (min-width: 64rem) {
+  /* Buscar, filtrar y ordenar caben en la misma línea, y así la primera
+     portada entra en pantalla sin bajar. */
+  #vista-biblioteca .contenido {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-content: start;
+    column-gap: 1rem;
+  }
+  #vista-biblioteca .contenido > * { grid-column: 1 / -1; }
+  /* Con el mismo peso que la regla de arriba, si no esta no se aplicaría. */
+  #vista-biblioteca .contenido > .buscador-biblioteca {
+    grid-column: 1; align-self: end;
+  }
+  #vista-biblioteca .contenido > .organizacion-biblioteca {
+    grid-column: 2; grid-template-columns: auto auto auto; align-items: end;
+  }
+  .organizacion-biblioteca select { min-width: 9.5rem; }
+
+  /* Las listas se reparten en columnas. Con «auto-fill» y un mínimo por
+     tarjeta el número de columnas lo decide el ancho disponible, sin fijar
+     cuántas hay en cada tramo. */
+  /* Una carpeta enseña su nombre y cuántas cosas tiene: no necesita el ancho
+     de un libro, que trae además autor, tamaño y progreso. Con la mitad caben
+     el doble por fila y la banda de carpetas deja de comerse la pantalla. */
+  .lista-libros.lista-carpetas:not(.vista-cuadricula) {
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  }
+  .lista-libros:not(.vista-cuadricula) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr));
+    gap: 0.5rem;
+    /* Igual de altas dentro de cada fila: unos libros traen autor y otros no,
+       y con alturas dispares la rejilla parece descuadrada. */
+    align-items: stretch;
+  }
+  /* Las lecturas recientes pasan a fichas verticales con la portada grande,
+     como en la vista de cuadrícula. Las columnas son de ancho fijo y no de
+     fracción: repartiéndose el hueco, una sola lectura se estiraría de lado a
+     lado. Aquí sobra sitio para el título entero, así que no se recorta. */
+  /* Y el recuadro se ciñe a las fichas que haya: con una o dos lecturas, un
+     marco de lado a lado con el hueco vacío queda peor que el problema que
+     resolvía. */
+  .continuar-leyendo { width: fit-content; max-width: 100%; justify-self: start; }
+  #libro-continuar {
+    display: grid;
+    /* Sin las columnas anchas que hereda de .lista-libros: aquí manda
+       grid-auto-columns, que solo dimensiona las columnas implícitas. */
+    grid-template-columns: none;
+    grid-auto-flow: column; grid-auto-columns: 12rem;
+    justify-content: start; gap: 0.6rem; align-items: stretch;
+    /* Pidiendo ocho lecturas la fila puede pasarse del ancho de la pantalla:
+       antes que encoger las fichas o romper la rejilla, la fila se desliza. */
+    overflow-x: auto; padding-bottom: 0.2rem;
+  }
+  #libro-continuar > li { display: block; }
+  #libro-continuar .libro {
+    height: 100%; flex-direction: column; align-items: stretch;
+    gap: 0.5rem; padding: 0.6rem 0.6rem 0.7rem;
+  }
+  #libro-continuar .libro .portada {
+    width: 100%; height: auto; aspect-ratio: 2 / 3;
+  }
+  #libro-continuar .libro .portada .icono { width: 2.2rem; height: 2.2rem; }
+  /* Fichas verticales también aquí, y con el mismo orden que en la cuadrícula
+     (ver «.vista-cuadricula»): título, autor y debajo el formato. */
+  #libro-continuar .libro .cabecera-libro { display: contents; }
+  #libro-continuar .libro .datos { gap: 0.22rem; }
+  #libro-continuar .libro .nombre { order: 1; }
+  #libro-continuar .libro .autor { order: 2; }
+  #libro-continuar .libro .formato { order: 3; }
+  #libro-continuar .libro .estado-sin-conexion,
+  #libro-continuar .libro .nota-libro,
+  #libro-continuar .libro .carpeta-libro { order: 4; }
+  #libro-continuar .libro .fila-detalle { order: 5; }
+  #libro-continuar .libro .barra-progreso { order: 6; }
+  #libro-continuar .libro .formato,
+  #libro-continuar .libro .estado-sin-conexion,
+  #libro-continuar .libro .nota-libro,
+  #libro-continuar .libro .carpeta-libro { align-self: flex-start; }
+  #libro-continuar .libro .nombre {
+    white-space: normal; font-size: 0.85rem; line-height: 1.3;
+  }
+  /* El progreso se pega abajo para que todas las fichas lo alineen, por largo
+     que sea el título de cada una. */
+  #libro-continuar .libro .fila-detalle { margin-top: auto; }
+  #libro-continuar .libro .barra-progreso { margin-top: 0.15rem; }
+  /* La destacada deja de ser mayor: aquí todas lucen su portada por igual. */
+  #libro-continuar li:not(:first-child) .libro { padding: 0.6rem 0.6rem 0.7rem; }
+  #libro-continuar li:not(:first-child) .portada { width: 100%; height: auto; }
+  #libro-continuar li:not(:first-child) .nombre { font-size: 0.85rem; }
+  .continuar-leyendo .btn-quitar-continuar {
+    background: rgba(15, 23, 42, 0.62); color: #e2e8f0;
+  }
+  .continuar-leyendo .btn-quitar-continuar:hover,
+  .continuar-leyendo .btn-quitar-continuar:focus-visible {
+    background: var(--peligro); color: var(--fondo-tarjeta);
+  }
+
+  /* Con más sitio, las portadas de la cuadrícula dejan de ser sellos. */
+  .lista-libros.vista-cuadricula {
+    grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  }
+}
+
+/* En monitores grandes las tarjetas no necesitan más de 30rem: pasado eso el
+   texto queda perdido en medio de la fila y se prefiere otra columna. */
+@media (min-width: 100rem) {
+  .lista-libros:not(.vista-cuadricula) {
+    grid-template-columns: repeat(auto-fill, minmax(26rem, 1fr));
+  }
+  .lista-libros.lista-carpetas:not(.vista-cuadricula) {
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  }
+  .lista-libros.vista-cuadricula {
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  }
+}
+
+/* ── Ayuda e Importar/Exportar en pantallas anchas ──
+   Son tarjetas independientes, así que en vez de una tira vertical larguísima
+   se reparten en dos columnas. Cada columna sigue midiendo unas 36rem, que es
+   ancho de lectura cómodo; el reparto es por filas (izquierda y luego derecha),
+   de modo que lo que se ve coincide con el orden del documento.
+   Los ajustes se quedan fuera: desde que van por pestañas, cada una enseña una
+   o dos tarjetas, y repartirlas dejaba las pestañas en una columna y su
+   contenido en la otra. */
+@media (min-width: 72rem) {
+  #vista-archivos .contenido {
+    max-width: 76rem;
+    display: block;   /* deja de ser una columna flexible */
+    columns: 2;
+    column-gap: 1rem;
+  }
+  /* Columnas de periódico y no una rejilla: las tarjetas tienen alturas muy
+     dispares y una rejilla por filas dejaría huecos enormes. Así se reparten
+     solas y el orden de lectura sigue siendo el del documento. */
+  #vista-archivos .contenido > * {
+    break-inside: avoid;
+    margin-bottom: 1rem;
+  }
+}
+/* La ayuda ya no se reparte en columnas: desde que va por pestañas, cada una
+   enseña lo suyo sin bajar media pantalla, y a 76rem las líneas salían tan
+   largas que costaba seguirlas. Se queda al ancho de lectura de siempre. */
+
+/* ── Estadísticas de lectura ── */
+
+/* Las cifras se reparten solas: en el móvil caben dos por fila y en el
+   ordenador cuatro, sin puntos de corte propios. */
+.cifras-estadisticas {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+}
+.cifra-estadistica {
+  display: flex; flex-direction: column; gap: 0.15rem;
+  padding: 0.7rem 0.8rem; border: 1px solid var(--borde); border-radius: 0.6rem;
+  background: color-mix(in srgb, var(--acento) 5%, var(--fondo-tarjeta));
+}
+/* Las cifras no miden lo mismo: «3 días» y «menos de 1 min» conviven en la
+   misma rejilla, así que el reparto en dos líneas se equilibra en vez de
+   dejar una palabra suelta debajo. */
+.cifra-valor {
+  font-size: 1.3rem; line-height: 1.2; color: var(--acento); text-wrap: balance;
+}
+.cifra-etiqueta { font-size: 0.85rem; color: var(--texto); }
+.cifra-pie { font-size: 0.78rem; color: var(--texto-suave); }
+
+/* El gráfico es una tira de barras a altura fija: así el alto de la tarjeta no
+   depende de cuánto se haya leído y la página no da saltos al repintarse. */
+.grafico-dias {
+  display: flex; align-items: flex-end; gap: 2px;
+  height: 8rem; padding-top: 0.25rem;
+}
+.columna-dia {
+  flex: 1; height: 100%;
+  display: flex; align-items: flex-end;
+}
+.barra-dia {
+  width: 100%; border-radius: 2px 2px 0 0;
+  background: var(--acento);
+}
+/* Los días en blanco dejan una raya, no un hueco: el vacío también es dato y
+   sin la raya no se distingue de un borde de la tarjeta. */
+.barra-dia.sin-lectura { background: var(--borde); }
+/* El tramo en curso va aún a medias, así que no compite en igualdad con los
+   cerrados: se distingue para que su barra corta no se lea como un bajón. */
+.barra-dia.en-curso {
+  background: repeating-linear-gradient(135deg,
+    var(--acento) 0 3px, color-mix(in srgb, var(--acento) 45%, transparent) 3px 6px);
+}
+
+/* ── Agrupar por días, semanas, meses o años ── */
+.cabecera-periodos {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.6rem;
+}
+.grupo-periodos button { font: inherit; font-size: 0.85rem; padding: 0.35rem 0.6rem; }
+
+/* El selector de orden vive en la cabecera de su tarjeta, junto al título: no
+   crece hasta llenar el hueco, se queda del ancho de lo que dice. */
+.campo-orden-libros { flex: none; font-size: 0.85rem; }
+.campo-orden-libros > span { color: var(--texto-suave); font-weight: 400; }
+.campo-orden-libros select { font-size: 0.85rem; padding: 0.3rem 0.4rem; }
+
+/* Con pocas barras (años, semanas) estirarlas a todo lo ancho las convierte en
+   manchas: se les pone un tope y el grupo se queda a la izquierda. */
+.grafico-dias .columna-dia { max-width: 3.5rem; }
+
+.comparacion-periodos {
+  display: flex; align-items: baseline; gap: 0.5rem 1.5rem; flex-wrap: wrap;
+  margin-top: 0.9rem; padding-top: 0.8rem; border-top: 1px solid var(--borde);
+}
+.lado-comparacion { display: flex; flex-direction: column; gap: 0.1rem; }
+.etiqueta-comparacion { font-size: 0.8rem; color: var(--texto-suave); }
+.valor-comparacion { font-size: 1.05rem; color: var(--acento); }
+.valor-comparacion.suave { color: var(--texto-suave); }
+/* La variación se va al otro extremo: es la conclusión, no un dato más. */
+.variacion-periodos {
+  margin-left: auto; font-size: 0.9rem; font-weight: 650;
+  border-radius: 999px; padding: 0.2rem 0.6rem;
+  background: color-mix(in srgb, var(--texto-suave) 15%, transparent);
+  color: var(--texto-suave);
+}
+.variacion-periodos.mas {
+  background: color-mix(in srgb, var(--exito) 16%, transparent); color: var(--exito);
+}
+/* Leer menos que el mes pasado no es un error: va en el gris de siempre y no
+   en el rojo de peligro, que aquí regañaría. */
+.variacion-periodos.menos {
+  background: color-mix(in srgb, var(--texto-suave) 15%, transparent);
+  color: var(--texto-suave);
+}
+
+.lista-estadisticas-libros { list-style: none; margin: 0; padding: 0; }
+.libro-estadistica {
+  display: grid; align-items: baseline; gap: 0.15rem 0.5rem;
+  grid-template-columns: 1fr auto auto;
+  padding: 0.5rem 0;
+}
+.libro-estadistica + .libro-estadistica { border-top: 1px solid var(--borde); }
+/* En «En qué se va el tiempo» cada fila es un botón que abre la ficha de ese
+   libro, así que el separador ya no cae entre hermanos: los botones van uno
+   por <li>. Va por el id y no por la clase de la lista porque el reparto por
+   aparato de la propia ficha comparte esa clase y allí las filas no se pulsan.
+   Se le quitan al botón sus colores y su borde, que aquí lo único que hace de
+   aviso es el resaltado al pasar por encima. */
+#libros-estadisticas li + li { border-top: 1px solid var(--borde); }
+#libros-estadisticas .libro-estadistica {
+  /* El resaltado se sale un poco a los lados para no pegarse al texto; el
+     ancho lo compensa para que la fila no desborde la tarjeta. */
+  width: calc(100% + 0.8rem); margin: 0 -0.4rem; padding: 0.5rem 0.4rem;
+  font: inherit; color: inherit; text-align: left;
+  background: none; border: none; border-radius: 0.5rem; cursor: pointer;
+}
+#libros-estadisticas .libro-estadistica:hover {
+  background: color-mix(in srgb, var(--acento) 10%, transparent);
+}
+#libros-estadisticas .libro-estadistica:focus-visible {
+  outline: 2px solid var(--acento); outline-offset: -2px;
+}
+.titulo-estadistica {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.formato-estadistica {
+  font-size: 0.7rem; letter-spacing: 0.04em; color: var(--texto-suave);
+  border: 1px solid var(--borde); border-radius: 0.35rem; padding: 0 0.3rem;
+}
+.tiempo-estadistica { font-size: 0.85rem; color: var(--texto-suave); }
+/* La barra ocupa la fila entera bajo el título: dice de un vistazo cuánto se
+   lleva cada libro comparado con el que más. */
+.barra-libro {
+  grid-column: 1 / -1; height: 4px; border-radius: 2px;
+  background: color-mix(in srgb, var(--texto-suave) 20%, transparent);
+}
+.barra-libro > div { height: 100%; border-radius: 2px; background: var(--acento); }
+/* El reparto por dispositivos va bajo la barra, en pequeño: es el detalle que
+   explica la cifra de arriba, no compite con ella. */
+.reparto-estadistica {
+  grid-column: 1 / -1;
+  font-size: 0.78rem; color: var(--texto-suave);
+}
+
+/* ── Ficha de un libro ── */
+
+/* Sobre todo lo demás y con velo: se abre desde el lector (donde hay panel de
+   índice y de marcadores por encima del texto) y desde la biblioteca. */
+.fondo-ficha-libro {
+  position: fixed; inset: 0; z-index: 96;
+  display: flex; align-items: center; justify-content: center;
+  padding: 1rem; background: color-mix(in srgb, #000 45%, transparent);
+}
+.ficha-libro {
+  width: min(30rem, 100%); max-height: calc(100dvh - 2rem); overflow: auto;
+  padding: 1rem; border: 1px solid var(--borde); border-radius: 0.75rem;
+  background: var(--fondo); color: var(--texto);
+  box-shadow: 0 10px 32px var(--sombra-fuerte);
+  display: flex; flex-direction: column; gap: 0.75rem;
+}
+.ficha-libro h2 { font-size: 1rem; }
+.reparto-ficha { display: flex; flex-direction: column; gap: 0.4rem; }
+.reparto-ficha h3 { font-size: 0.85rem; color: var(--texto-suave); font-weight: 600; }
+/* En la ficha el reparto no tiene columna de formato: el libro es uno solo. */
+.reparto-ficha .libro-estadistica { grid-template-columns: 1fr auto; }
+
+/* Sacar el libro de la lista de estadísticas. Va al final de la ficha y
+   separado por una línea: es una acción, no un dato más de los de arriba. */
+.ocultar-ficha {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 0.4rem;
+  padding-top: 0.75rem; border-top: 1px solid var(--borde);
+}
+.ocultar-ficha .ayuda { margin: 0; font-size: 0.8rem; }
+
+/* La versión, al pie de los ajustes: se lee cuando se busca, no antes. */
+.version-app {
+  margin: 1.5rem 0 0; text-align: center;
+  font-size: 0.75rem; color: var(--texto-suave);
+}
+
+/* El único dato de la barra del pie que se pulsa. Se subraya de puntos para
+   que se note sin gritar, porque el resto de la línea no es pulsable. */
+.dato-estado-pulsable {
+  font: inherit; color: inherit; padding: 0; border: none; background: none;
+  cursor: pointer; text-decoration: underline dotted; text-underline-offset: 0.2em;
+}
+.dato-estado-pulsable:hover, .dato-estado-pulsable:focus-visible { color: var(--acento); }

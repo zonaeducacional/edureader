@@ -1,0 +1,137 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+
+import {
+  segundosDeLaMuestra, acumularRitmo, segundosPorUnidad, minutosRestantes,
+  reubicacionEsLectura,
+  SEMIVIDA_PAGINAS, SEMIVIDA_PORCENTAJE, SEGUNDOS_TOPE,
+  UNIDADES_MINIMAS_PORCENTAJE,
+} from '../js/ritmo.js';
+
+// Lee 'paginas' páginas seguidas a 'segundos' por página, de una en una.
+function leer(entrada, paginas, segundos) {
+  for (let i = 0; i < paginas; i++) entrada = acumularRitmo(entrada, segundos, 1);
+  return entrada;
+}
+
+test('descarta los vistazos de un segundo', () => {
+  assert.equal(segundosDeLaMuestra(1, 1), null);
+  assert.equal(segundosDeLaMuestra(30, 1), 30);
+});
+
+// Leer despacio ya no cuesta el tramo entero: antes de acotar, una página que
+// llevara más del tope se quedaba en cero segundos leídos.
+test('un tramo largo se acota en vez de perderse', () => {
+  assert.equal(segundosDeLaMuestra(600, 1), SEGUNDOS_TOPE);
+  assert.equal(segundosDeLaMuestra(SEGUNDOS_TOPE, 1), SEGUNDOS_TOPE);
+  assert.equal(segundosDeLaMuestra(SEGUNDOS_TOPE - 1, 1), SEGUNDOS_TOPE - 1);
+});
+
+test('descarta los saltos de posición y el retroceso', () => {
+  assert.equal(segundosDeLaMuestra(30, 12), null);
+  assert.equal(segundosDeLaMuestra(30, -3), null);
+  assert.equal(segundosDeLaMuestra(30, 0), 30); // tiempo en la misma página
+});
+
+test('no estima nada hasta reunir lectura suficiente', () => {
+  assert.equal(segundosPorUnidad(undefined), null);
+  assert.equal(segundosPorUnidad(leer(null, 2, 40)), null); // pocas unidades
+  assert.equal(segundosPorUnidad(leer(null, 3, 10)), null); // pocos segundos
+  assert.ok(segundosPorUnidad(leer(null, 5, 60)) > 0);
+});
+
+test('estima el ritmo a partir de una lectura constante', () => {
+  const entrada = leer(null, 30, 45);
+  assert.ok(Math.abs(segundosPorUnidad(entrada) - 45) < 1);
+  assert.equal(minutosRestantes(entrada, 100), 75);
+});
+
+test('el tiempo sin pasar de página cuenta como lectura de esa página', () => {
+  let entrada = leer(null, 10, 30);
+  const antes = segundosPorUnidad(entrada);
+  entrada = acumularRitmo(entrada, 60, 0);
+  assert.ok(segundosPorUnidad(entrada) > antes);
+});
+
+test('sigue el ritmo reciente en lugar de la media de todo el libro', () => {
+  // 200 páginas a 100 s y luego un buen tramo a 20 s. La media de todo el
+  // libro se quedaría cerca de 87 s; aquí la estimación baja hacia el ritmo
+  // nuevo y sigue bajando cuanto más se lee así.
+  const lento = leer(null, 200, 100);
+  const ritmos = [40, 80, 120].map((paginas) => segundosPorUnidad(leer(lento, paginas, 20)));
+  assert.deepEqual(ritmos, [...ritmos].sort((a, b) => b - a), 'debe ir bajando');
+  assert.ok(ritmos[0] < 70, `tras 40 páginas rápidas esperaba < 70 s, obtuve ${ritmos[0]}`);
+  assert.ok(ritmos[2] < 30, `tras 120 páginas rápidas esperaba < 30 s, obtuve ${ritmos[2]}`);
+});
+
+test('tras una semivida el tramo anterior pesa la mitad', () => {
+  const entrada = leer(leer(null, 400, 20), SEMIVIDA_PAGINAS, 60);
+  const ritmo = segundosPorUnidad(entrada);
+  assert.ok(ritmo > 35 && ritmo < 45, `esperaba el punto medio (40 s), obtuve ${ritmo}`);
+});
+
+test('el EPUB olvida en puntos de porcentaje, no en páginas', () => {
+  // Avanzar 8 unidades al doble de velocidad mueve mucho la estimación de un
+  // EPUB (es un 8 % del libro) y apenas la de un PDF (son 8 páginas).
+  const inicio = { s: 200 * 100, u: 200 };
+  const epub = segundosPorUnidad(
+    Array.from({ length: SEMIVIDA_PORCENTAJE })
+      .reduce((entrada) => acumularRitmo(entrada, 50, 1, SEMIVIDA_PORCENTAJE), inicio));
+  const pdf = segundosPorUnidad(leer(inicio, SEMIVIDA_PORCENTAJE, 50));
+  assert.ok(pdf > 95, `el PDF debe moverse poco desde 100 s, obtuve ${pdf}`);
+  assert.ok(epub < pdf - 10, `el EPUB debe moverse más: ${epub} frente a ${pdf}`);
+});
+
+test('lo acumulado no crece sin límite', () => {
+  const corta = leer(null, 50, 30);
+  const larga = leer(null, 5000, 30);
+  assert.ok(larga.u < 60, `las unidades se estabilizan, obtuve ${larga.u}`);
+  assert.ok(Math.abs(segundosPorUnidad(corta) - segundosPorUnidad(larga)) < 1);
+});
+
+test('asimila los acumulados antiguos sin olvido exponencial', () => {
+  // Formato anterior: sumas de todo el libro (200 páginas a 100 s).
+  const antiguo = { s: 20000, u: 200 };
+  const entrada = leer(antiguo, 60, 20);
+  const ritmo = segundosPorUnidad(entrada);
+  assert.ok(ritmo < 60, `debe acercarse al ritmo nuevo, obtuve ${ritmo}`);
+});
+
+test('no estima con un número de unidades restantes inválido', () => {
+  assert.equal(minutosRestantes(leer(null, 30, 45), null), null);
+});
+
+test('en un libro largo el tiempo aparece tras unos minutos, no tras unas horas', () => {
+  // Un EPUB de ~6800 pantallas: cada una avanza 0,015 puntos de porcentaje.
+  // A 40 s por pantalla, quince minutos son 22 pantallas y 0,33 puntos.
+  let entrada = null;
+  for (let i = 0; i < 22; i++) entrada = acumularRitmo(entrada, 40, 0.015, SEMIVIDA_PORCENTAJE);
+  assert.equal(segundosPorUnidad(entrada), null); // con el mínimo de las páginas
+  const ritmo = segundosPorUnidad(entrada, UNIDADES_MINIMAS_PORCENTAJE);
+  assert.ok(ritmo > 0);
+  // 40 s por 0,015 puntos son unas 74 horas para el libro entero.
+  const horas = minutosRestantes(entrada, 99.7, UNIDADES_MINIMAS_PORCENTAJE) / 60;
+  assert.ok(horas > 60 && horas < 90, `horas estimadas: ${horas}`);
+});
+
+test('los dos primeros minutos siguen sin estimar nada', () => {
+  let entrada = null;
+  for (let i = 0; i < 2; i++) entrada = acumularRitmo(entrada, 40, 0.015, SEMIVIDA_PORCENTAJE);
+  assert.equal(segundosPorUnidad(entrada, UNIDADES_MINIMAS_PORCENTAJE), null);
+});
+
+test('repaginar no es lectura: el reajuste no cuenta como pasar de página', () => {
+  // El EPUB avisa con otro porcentaje después de repaginar (girar el móvil,
+  // abrir el índice): la lectura sigue donde estaba.
+  assert.equal(reubicacionEsLectura(true, 63.1, 63.3), false);
+  // El PDF avisa con la misma página al remontar por el zoom.
+  assert.equal(reubicacionEsLectura(false, 12, 12), false);
+});
+
+test('pasar de página sí es lectura', () => {
+  assert.equal(reubicacionEsLectura(false, 63.5, 63.3), true);
+  assert.equal(reubicacionEsLectura(false, 13, 12), true);
+  // Y la primera reubicación de la sesión, sin nada anterior con lo que
+  // comparar, también abre tramo.
+  assert.equal(reubicacionEsLectura(false, 1, null), true);
+});
