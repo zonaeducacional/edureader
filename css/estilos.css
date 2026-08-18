@@ -164,6 +164,11 @@ body {
   line-height: 1.5;
 }
 
+option {
+  background-color: var(--fondo-lector);
+  color: var(--texto);
+}
+
 .oculto { display: none !important; }
 
 /* Un único indicador de foco para todo lo que se puede tabular: el fondo tenue
