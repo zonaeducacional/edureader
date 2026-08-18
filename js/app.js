@@ -9014,11 +9014,13 @@ function velocidadTtsGuardada() {
 }
 
 function idiomaLibroActual() {
+  let baseLang = null;
   if (epubAbierto()) {
     const lang = lectorEpub.libro?.packaging?.metadata?.language;
-    if (lang) return String(lang).toLowerCase().split(/[-_]/)[0];
+    if (lang) baseLang = String(lang).toLowerCase().split(/[-_]/)[0];
   }
-  return idiomaActual();
+  const idiomaFinal = baseLang || idiomaActual();
+  return idiomaFinal === 'pt' ? 'pt-BR' : idiomaFinal;
 }
 
 async function textoPaginasPdf({ desdeLaVista = false } = {}) {
